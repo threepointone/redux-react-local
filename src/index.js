@@ -127,7 +127,7 @@ export function local({
         render(){
           return React.createElement(Target, {
             setState: this._setState,
-            x: this._dispatch,
+            xpatch: this._dispatch,
             state: this.props.local || getInitial(this.props),
           }, this.props.children);
         }

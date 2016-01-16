@@ -4,7 +4,7 @@
   "description": "recovering local component state for redux",
   "main": "lib/index.js",
   "scripts": {
-    "build": "babel src -o lib",
+    "build": "babel src -d lib",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
