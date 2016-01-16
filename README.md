@@ -11,11 +11,11 @@ redux-react-local
 import {localReducer, local} from 'redux-react-local';
 
 // include the reducer on your redux store on a 'local' key
-combineReducers({
-  local: localReducer,
-  ...your reducers
+let store = combineReducers({
+  local: localReducer
 })
 
+//...
 
 // and connect your components
 local({
@@ -42,7 +42,7 @@ local({
 more -
 
 - dispatch / reduce locally
-- listen on other components via redux/connect
+- listen on other 'components' via redux/connect
 
 local
 ---
