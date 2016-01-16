@@ -1,0 +1,32 @@
+{
+  "name": "redux-react-local",
+  "version": "1.0.0",
+  "description": "recovering local component state for redux",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "babel src -o lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "local",
+    "state"
+  ],
+  "author": "Sunil Pai <threepointone@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "babel": "^6.3.26",
+    "babel-cli": "^6.4.0",
+    "babel-eslint": "^4.1.6",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
+    "eslint": "^1.10.3",
+    "eslint-plugin-react": "^3.15.0",
+    "react": "^0.14.6",
+    "react-dom": "^0.14.6",
+    "react-redux": "^4.0.6",
+    "redux": "^3.0.5"
+  }
+}
