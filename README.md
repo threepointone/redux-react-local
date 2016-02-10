@@ -1,41 +1,38 @@
 redux-react-local
 ---
 
-- setState for local components, but persist to a redux store
-- colocate reducers and components
+- mad science inc.
 
 
-`npm install react redux react-redux redux-react-local --save`
+`npm install redux-react-local --save`
 
 ```jsx
-import {localReducer, local} from 'redux-react-local';
+import {Root, local} from 'redux-react-local';
 
-// include the reducer on your redux store on a 'local' key
-let store = combineReducers({
-  local: localReducer
-})
-
-//...
-
-// and connect your components
+// connect your components
 local({
   ident: 'app',
   initial: {count: 0},
   // optionally -
   reducer(state, action){
-    if(action.self){
+    if(action.me){
       switch(action.meta.type){
       // increment decrement etc
     }
     // reduce on other global dispatches here
     return state;
+  },
+  saga: function* (_, {getState, $}){
+    // via redux-saga
   }
 })
-(function App({state, setState, xpatch}){
-  return <div onClick={() => setState({count: state.count + 1})>
+(function App({state, dispatch, $}){
+  return <div onClick={() => dispatch($('increment'))>
     clicked {state.count} times <br/>
   </div>
 })
+
+render(<Root><App/></App>, /* ... */);
 
 ```
 
@@ -47,8 +44,32 @@ more -
 local
 ---
 
+decorator for a react component
+
 - `ident` - a 'unique' string that corresponds to the component. eg - 'app', 'inbox', 'messages:341', etc
 - `ident (props)` - a function that returns the above
 - `initial` - initial state
 - `initial (props)` - a function that returns the above
 - `reducer (state, action)`
+- `saga *(getState, {$, dispatch, getState})
+
+actions in reducers get annotated with data to assist in reducing. an action that originated in the same component will have `action.me === true`. further, `action.meta.type` will contain be as it originated. note - you must wrap your actions with `$()` to ensure this behavior.
+
+sagas are started once the component mounts, and gets passed a callback to get redux state. it also gets passed an object with `$()`, a locally scoped `getState()`, and the `id` of the component.
+
+passed props
+---
+
+- dispatch - redux's dispatch
+- $ - helper to locally scope an action
+- state
+
+
+Root
+---
+
+- middleware - an array of redux middleware
+- reducers - an object with reducers
+
+this sets up a redux store, adding support for sagas and local annotations. I'll come up with a better way to integrate with existing redux apps.
+
