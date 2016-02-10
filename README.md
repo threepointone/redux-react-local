@@ -28,7 +28,7 @@ local({
 })
 (function App({state, dispatch, $}){
   return <div onClick={() => dispatch($('increment'))>
-    clicked {state.count} times <br/>
+    clicked {state.count} times
   </div>
 })
 
