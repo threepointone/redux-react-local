@@ -51,7 +51,7 @@ decorator for a react component
 - `initial` - initial state
 - `initial (props)` - a function that returns the above
 - `reducer (state, action)`
-- `saga *(getState, {$, dispatch, getState})
+- `saga *(getState, {$, dispatch, getState})`
 
 actions in reducers get annotated with data to assist in reducing. an action that originated in the same component will have `action.me === true`. further, `action.meta.type` will contain be as it originated. note - you must wrap your actions with `$()` to ensure this behavior.
 
