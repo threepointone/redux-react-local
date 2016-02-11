@@ -49,10 +49,12 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
-    "redux-batched-subscribe": "^0.1.4",
-    "redux-saga": "^0.7.0",
+    "@meadow/redux-ensure-fsa": "^1.0.5",
     "react-redux": "^4.4.0",
-    "redux": "^3.3.1"
+    "redux": "^3.3.1",
+    "redux-batched-subscribe": "^0.1.4",
+    "redux-optimist": "0.0.2",
+    "redux-saga": "^0.7.0"
   },
   "peerDependencies": {
     "react": "*"

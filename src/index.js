@@ -1,6 +1,8 @@
 import React, {PropTypes, Component} from 'react';
 import { Provider, connect } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
+import optimist from 'redux-optimist';
+import ensureFSAMiddleware from '@meadow/redux-ensure-fsa';
 
 import { batchedSubscribe } from 'redux-batched-subscribe';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
@@ -24,17 +26,17 @@ export class Root extends Component{
     reducers: {}
   };
   sagas = createSagaMiddleware();
-  store = createStore(combineReducers({
+  store = createStore(optimist(combineReducers({
     // reducers
     ...this.props.reducers,
     local: localReducer
-  }), {
+  })), {
     // initial state
   }, compose(applyMiddleware(
     // middleware
     ...this.props.middleware,
-
-    this.sagas
+    this.sagas,
+    ensureFSAMiddleware // todo - only for development
   ), batchedSubscribe(batchedUpdates)));
   static childContextTypes = {
     sagas: PropTypes.func
