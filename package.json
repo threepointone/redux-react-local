@@ -44,13 +44,17 @@
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-motion": "^0.4.2",
-    "react-redux": "^4.4.0",
-    "redux": "^3.3.1",
     "style-loader": "^0.13.0",
     "webpack": "^1.12.13",
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
-    "redux-saga": "^0.7.0"
+    "redux-batched-subscribe": "^0.1.4",
+    "redux-saga": "^0.7.0",
+    "react-redux": "^4.4.0",
+    "redux": "^3.3.1"
+  },
+  "peerDependencies": {
+    "react": "*"
   }
 }

@@ -20,7 +20,7 @@ class App extends Component {
 
   render() {
     return <div onClick={this.onClick}>
-      {times(10, i => <Cell id={i} key={i}/>)}
+      {times(200, i => <Cell id={i} key={i}/>)}
     </div>;
   }
 }
@@ -70,18 +70,11 @@ function ltoRgb(l){
   }
 })
 class Cell extends Component{
-  static style = {
-    width: 100,
-    height: 100,
-    display: 'block',
-    float: 'left'
-  };
   render(){
-    let {ident, state} = this.props;
-    return <div style={{
-        ...Cell.style,
-        backgroundColor: ltoRgb(state.brightness)
-      }}>{ident}</div>;
+    let {brightness} = this.props.state;
+    return <div className='cell' style={{
+        backgroundColor: ltoRgb(brightness)
+      }}/>;
   }
 }
 

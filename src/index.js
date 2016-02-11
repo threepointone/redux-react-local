@@ -2,7 +2,10 @@ import React, {PropTypes, Component} from 'react';
 import { Provider, connect } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 
-import {createStore, combineReducers, applyMiddleware} from 'redux';
+import { batchedSubscribe } from 'redux-batched-subscribe';
+import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+
+import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
 // local component state, synced to a redux store
 
 function log(...args){
@@ -27,11 +30,12 @@ export class Root extends Component{
     local: localReducer
   }), {
     // initial state
-  }, applyMiddleware(
+  }, compose(applyMiddleware(
     // middleware
     ...this.props.middleware,
+
     this.sagas
-  ));
+  ), batchedSubscribe(batchedUpdates)));
   static childContextTypes = {
     sagas: PropTypes.func
   };
@@ -57,9 +61,12 @@ export function localReducer(state = {registered: {}}, action){
       // todo - throw, but not when hot reloading
       console.warn(`${payload.id} already exists`);
     }
-    return {
+    if (payload.id === 'registered'){
+      throw new Error('cannot have an ident named `registered`, sorry!');
+    }
+    state = {
         ...state,
-        [payload.id] : state[payload.id] || payload.initial,
+        [payload.id] : state[payload.id] || payload.initial, // this way we can 'persist' across unmounts
         registered : {
           ...state.registered,
           [payload.id]: {
@@ -74,23 +81,8 @@ export function localReducer(state = {registered: {}}, action){
     return state;
   }
 
-  if (type === 'local.unmount'){
-    return {
-        ...state,
-        // we leave the data in place
-        // [action.payload.id] : state[action.payload.id] || action.payload.initial,
-        registered : {
-          ...state.registered,
-          [payload.id]: {
-            reducer: identity // signals that this is unmounted
-          }
-        }
-      };
-  }
-
-
   let ret = {registered: state.registered}, changed = false;
-  Object.keys(state.registered).forEach((key, i) => {
+  Object.keys(state.registered).forEach(key => {
     let a = action;
 
     if (meta && meta.local && key === meta.id){
@@ -109,15 +101,31 @@ export function localReducer(state = {registered: {}}, action){
   });
 
 
-  if (!changed) {
-    return state;
+  if (changed) {
+    // prevent rerenders if nothing's changed
+    state = ret;
   }
-  return ret;
+
+  if (type === 'local.unmount'){
+    state = {
+      ...state,
+      // we can leave the data in place
+      [payload.id] : payload.persist ? state[payload.id] : undefined,
+      registered : {
+        ...state.registered,
+        [payload.id]: {
+          reducer: identity // signals that this is unmounted
+        }
+      }
+    };
+  }
+
+  return state;
 
 }
 
 export function local({
-  ident, initial = {}, reducer = x => x, saga
+  ident, initial = {}, reducer = x => x, saga, persist = true
 } = {}){
   if (!ident){
     throw new Error('cannot annotate with @local without an ident');
@@ -211,7 +219,8 @@ export function local({
           this.props.dispatch({
             type: 'local.unmount',
             payload: {
-              id: this.id
+              id: this.id,
+              persist
             }
           });
           if (this.runningSaga){
