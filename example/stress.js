@@ -28,10 +28,7 @@ function ltoRgb(l){
   }),
   reducer: (state, {payload, meta, me}) => {
     if (me && meta.type === 'tick'){
-      return {
-        ...state,
-        brightness: payload
-      };
+      return { ...state, brightness: payload };
     }
     return state;
   },

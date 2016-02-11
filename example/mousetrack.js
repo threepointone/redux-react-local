@@ -38,9 +38,9 @@ function events(target, event) {
   },
   *saga(_, {$}){
     while (true){
-      let e = yield take('app:mousedown');
-      e.payload.preventDefault();
-      e.payload.stopPropagation();
+      let down = (yield take('app:mousedown')).payload;
+      down.preventDefault();
+      down.stopPropagation();
 
       // start listening to mousemove and mouseup events
       let up$ = events(window, 'mouseup');

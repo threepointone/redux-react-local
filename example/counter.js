@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {local, Root} from '../src';
 
+// no need for a saga here, just directly reduce
+
 @local({
   ident: 'app',
   initial: 0,
