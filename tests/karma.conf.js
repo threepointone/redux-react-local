@@ -1,7 +1,7 @@
 module.exports = function(config){
   config.set({
     browsers: ['Chrome'],
-    files: ['./index.js'],
+    files: ['../node_modules/babel-polyfill/dist/polyfill.js', './index.js'],
     reporters: ['mocha', 'coverage'],
     mochaReporter: {
       output: 'autowatch'
@@ -18,7 +18,7 @@ module.exports = function(config){
           loader: 'babel'
         }, {
           test: /\.js$/,
-          include: require('path').resolve('src/'),
+          include: require('path').join(__dirname, '../src'),
           loader: 'isparta'
         }]
       }

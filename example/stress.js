@@ -75,11 +75,11 @@ class Cell extends Component{
     float: 'left'
   };
   render(){
-    let {id, state} = this.props;
+    let {ident, state} = this.props;
     return <div style={{
         ...Cell.style,
         backgroundColor: ltoRgb(state.brightness)
-      }}>{id}</div>;
+      }}>{ident}</div>;
   }
 }
 

@@ -60,9 +60,10 @@ sagas are started once the component mounts, and gets passed a callback to get r
 passed props
 ---
 
-- dispatch - redux's dispatch
+- dispatch - via redux
 - $ - helper to locally scope an action
 - state
+- ident
 
 
 Root

@@ -111,9 +111,11 @@ export function localReducer(state = {registered: {}}, action){
 export function local({
   ident, initial = {}, reducer = x => x, saga
 } = {}){
+  if (!ident){
+    throw new Error('cannot annotate with @local without an ident');
+  }
 
   return function(Target){
-
 
     function getId(props){
       if (typeof ident === 'string'){
@@ -137,7 +139,8 @@ export function local({
         };
 
         state = {
-          id: getId(this.props)
+          id: getId(this.props),
+          value: getInitial(this.props)
         };
 
         componentWillMount(){
@@ -146,13 +149,17 @@ export function local({
             payload: {
               id: this.state.id,
               reducer,
-              initial: getInitial(this.props)
+              initial: this.state.value
             }
           });
         }
         componentDidMount(){
           if (saga){
-            this.runningSaga = this.context.sagas.run(saga, {$: this.$, id: getId(this.props), getState: () => this.props.local || getInitial(this.props)});
+            this.runningSaga = this.context.sagas.run(saga, {
+              $: this.$,
+              ident: this.state.id,
+              getState: () => this.state.value
+            });
           }
         }
         componentWillReceiveProps(next){
@@ -168,13 +175,12 @@ export function local({
               }
             });
 
-            this.setState({ id });
-
           }
+          this.setState({ id, value: next.local });
         }
         $ = (type, payload) => {
           return {
-            type: `${getId(this.props)}:${type}`,
+            type: `${this.state.id}:${type}`,
             payload,
             meta: {
               // this is just to be faster when reducing
@@ -188,8 +194,9 @@ export function local({
           return React.createElement(Target, {
             ...this.props,
             $: this.$,
+            ident: this.state.id,
             dispatch: this.props.dispatch,
-            state: this.props.local || getInitial(this.props),
+            state: this.state.value,
           }, this.props.children);
         }
         componentWillUnmount(){
