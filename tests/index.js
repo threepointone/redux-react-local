@@ -22,6 +22,7 @@
 
 import React, {Component, PropTypes} from 'react';
 import {render, unmountComponentAtNode} from 'react-dom';
+import {connect} from 'react-redux';
 import {findRenderedDOMComponentWithTag, Simulate} from 'react-addons-test-utils';
 
 import {put, cps, SagaCancellationException} from 'redux-saga';
@@ -86,7 +87,27 @@ describe('redux-react-local', () => {
 
   });
 
-  it('uses ident as a key for redux store');
+  it('uses ident as a key for redux store', () => {
+    @local({
+      ident: 'app',
+      initial: 'zzz'
+    })
+    class App extends Component{
+      render(){
+        return <Inner/>;
+      }
+    }
+
+    @connect(x => x)
+    class Inner extends Component{
+      render(){
+        return <div>{this.props.local.app}</div>;
+      }
+    }
+
+    render(<Root><App /></Root>, node);
+    expect(node.innerText).toEqual('zzz');
+  });
 
   // state
   it('can have an initial state', () => {
@@ -183,11 +204,11 @@ describe('redux-react-local', () => {
     }
     render(<Root><App /></Root>, node);
   });
-  it('localized events have meta information', () => {
+  it('local events have meta information', () => {
     // as above
   });
 
-  it('actions that originated in the same component can be detected', () => {
+  it('local actions can be detected', () => {
     class App extends Component{
       componentDidMount(){
         this.props.dispatch(this.props.$('beep', 10));
