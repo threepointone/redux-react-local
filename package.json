@@ -1,6 +1,6 @@
 {
   "name": "redux-react-local",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "recovering local component state for redux",
   "main": "lib/index.js",
   "scripts": {
