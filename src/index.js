@@ -87,25 +87,33 @@ export function localReducer(state = {registered: {}}, action){
         }
       };
   }
-  let reduced = Object
-    .keys(state.registered)
-    .reduce((o, key) =>{
-      let a = action;
 
-      if (meta && meta.local && key === meta.id){
-        a = {
-          ...a,
-          me: true
-        };
-      }
-      return Object.assign(o, {
-        [key]: state.registered[key].reducer(state[key], a)
-      });
-    }, {});
-  return {
-      ...state,
-      ...reduced
-    };
+
+  let ret = {registered: state.registered}, changed = false;
+  Object.keys(state.registered).forEach((key, i) => {
+    let a = action;
+
+    if (meta && meta.local && key === meta.id){
+      a = {
+        ...a,
+        me: true
+      };
+    }
+
+    let computed = state.registered[key].reducer(state[key], a);
+
+    if (computed !== state[key]){
+      changed = true;
+    }
+    ret[key] = computed;
+  });
+
+
+  if (!changed) {
+    return state;
+  }
+  return ret;
+
 }
 
 export function local({

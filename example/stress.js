@@ -1,4 +1,8 @@
+
+
 import React, { Component } from 'react';
+
+// require('./raf-batching').inject();
 import {render} from 'react-dom';
 import { Root, local } from '../src';
 import {cps, put} from 'redux-saga';
@@ -16,9 +20,7 @@ class App extends Component {
 
   render() {
     return <div onClick={this.onClick}>
-      {times(100, i =>
-        <Cell id={i} key={i}/>
-        )}
+      {times(100, i => <Cell id={i} key={i}/>)}
     </div>;
   }
 }
