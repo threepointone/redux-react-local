@@ -2,7 +2,7 @@
  //    ✔ passes ident
  //    ✔ ident can use props
  //    ✔ throws if you don't pass ident
- //    ✖ uses ident as a key for redux store (skipped)
+ //    ✔ uses ident as a key for redux store (skipped)
  //    ✔ can have an initial state
  //    ✔ initial state can use props
  //    ✔ accepts a reducer that gets called on all actions
