@@ -1,47 +1,21 @@
-
-
-import React, { Component } from 'react';
-
-// require('./raf-batching').inject();
+import React, {Component} from 'react';
 import {render} from 'react-dom';
-import { Root, local } from '../src';
+import {Root, local} from '../src';
 import {cps, put} from 'redux-saga';
 
-function times(n, fn){
-  let ctr = 0, arr = [];
-  while (ctr < n){
-    arr.push(fn(ctr));
-    ctr++;
-  }
-  return arr;
-}
-
-class App extends Component {
-  render() {
-    return <div onClick={this.onClick}>
-      {times(400, i => <Cell id={i} key={i} />)}
-    </div>;
-  }
-}
-
 function sleep(period, done){
-  // console.log(period);
   setTimeout(() => done(null, true), period);
 }
 
- function rgbToHex(r, g, b) {
-    r = r.toString(16);
-    g = g.toString(16);
-    b = b.toString(16);
-    r = r.length < 2 ? '0' + r : r;
-    g = g.length < 2 ? '0' + g : g;
-    b = b.length < 2 ? '0' + b : b;
-    return '#' + r + g + b;
-  }
+function toHex(n) {
+  n = n.toString(16);
+  n = n.length < 2 ? '0' + n : n;
+  return n;
+}
 
 function ltoRgb(l){
-  let v = Math.round(l * 2.55);
-  return rgbToHex(v, v, v);
+  let v = toHex(Math.round(l * 2.55));
+  return '#' + v + v + v;
 }
 
 @local({
@@ -51,13 +25,11 @@ function ltoRgb(l){
     brightness: Math.random() * 100
   }),
   reducer: (state, {payload, meta, me}) => {
-    if (me){
-      if (meta.type === 'tick'){
-        return {
-          ...state,
-          brightness: payload
-        };
-      }
+    if (me && meta.type === 'tick'){
+      return {
+        ...state,
+        brightness: payload
+      };
     }
     return state;
   },
@@ -71,14 +43,26 @@ function ltoRgb(l){
 class Cell extends Component{
   render(){
     let {brightness} = this.props.state;
-    return <div className='cell' style={{
-        backgroundColor: ltoRgb(brightness)
-      }}/>;
+    return <div className='cell' style={{backgroundColor: ltoRgb(brightness)}} />;
+  }
+}
+
+function times(n, fn){
+  let arr = [];
+  for (let i = 0; i < n; i++){
+    arr.push(fn(i));
+  }
+  return arr;
+}
+
+class App extends Component {
+  render() {
+    return <div onClick={this.onClick}>
+      {times(400, i => <Cell id={i} key={i} />)}
+    </div>;
   }
 }
 
 
-render(<Root >
-  <App />
-</Root>, document.getElementById('app'));
+render(<Root><App /></Root>, document.getElementById('app'));
 
