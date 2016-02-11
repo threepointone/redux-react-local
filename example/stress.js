@@ -3,6 +3,8 @@ import {render} from 'react-dom';
 import {Root, local} from '../src';
 import {cps, put} from 'redux-saga';
 
+import styles from 'stress.css';
+
 function sleep(period, done){
   setTimeout(() => done(null, true), period);
 }
@@ -43,7 +45,7 @@ function ltoRgb(l){
 class Cell extends Component{
   render(){
     let {brightness} = this.props.state;
-    return <div className='cell' style={{backgroundColor: ltoRgb(brightness)}} />;
+    return <div className={styles.cell} style={{backgroundColor: ltoRgb(brightness)}} />;
   }
 }
 

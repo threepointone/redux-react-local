@@ -8,7 +8,7 @@ import { batchedSubscribe } from 'redux-batched-subscribe';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 
 import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
-// local component state, synced to a redux store
+
 
 function log(...args){
   console.log(...args, this);
@@ -58,6 +58,12 @@ const identity = x => x;
 
 export function localReducer(state = {registered: {}}, action){
   let {payload, type, meta} = action;
+  // this is the test sequence -
+  // - local.register
+  // - local.swap
+  // - then reduce on all local keys
+  // - local.unmount
+
   if (type === 'local.register'){
     if (state.registered[payload.id] && state.registered[payload.id].reducer !== identity){
       // todo - throw, but not when hot reloading
@@ -83,10 +89,12 @@ export function localReducer(state = {registered: {}}, action){
     return state;
   }
 
+  // update all local keys
   let ret = {registered: state.registered}, changed = false;
   Object.keys(state.registered).forEach(key => {
     let a = action;
 
+    // if this originated from the same key, then add me: true
     if (meta && meta.local && key === meta.id){
       a = {
         ...a,
@@ -94,6 +102,7 @@ export function localReducer(state = {registered: {}}, action){
       };
     }
 
+    // reduce
     let computed = state.registered[key].reducer(state[key], a);
 
     if (computed !== state[key]){
@@ -127,7 +136,11 @@ export function localReducer(state = {registered: {}}, action){
 }
 
 export function local({
-  ident, initial = {}, reducer = x => x, saga, persist = true
+  ident, // string / ƒ(props)
+  initial = {}, // object / ƒ(props)
+  reducer = x => x, // ƒ(state, action) => state
+  saga, // ƒ*(getState, {$, ident, getState})
+  persist = true // experimental - can swap out state on unmount
 } = {}){
   if (!ident){
     throw new Error('cannot annotate with @local without an ident');
@@ -149,93 +162,102 @@ export function local({
       return initial(props);
     }
 
-    return connect((state, props) => ({local: state.local[getId(props)]}))(
-      class ReduxReactLocal extends Component{
-        static displayName = 'local:' + (Target.displayName || Target.name);
-        static contextTypes = {
-          sagas: PropTypes.func
-        };
+    @connect((state, props) => ({
+      local: state.local[getId(props)]
+    }))
+    class ReduxReactLocal extends Component{
+      static displayName = 'local:' + (Target.displayName || Target.name);
+      static contextTypes = {
+        sagas: PropTypes.func
+      };
 
-        state = {
-          id: getId(this.props),
-          value: getInitial(this.props)
-        };
+      state = {
+        id: getId(this.props),
+        value: getInitial(this.props)
+      };
 
-        componentWillMount(){
-          this.props.dispatch({
-            type: 'local.register',
-            payload: {
-              id: this.state.id,
-              reducer,
-              initial: this.state.value
-            }
-          });
-        }
-        componentDidMount(){
-          if (saga){
-            this.runningSaga = this.context.sagas.run(saga, {
-              $: this.$,
-              ident: this.state.id,
-              getState: () => this.state.value
-            });
+      componentWillMount(){
+        this.props.dispatch({
+          type: 'local.register',
+          payload: {
+            id: this.state.id,
+            reducer,
+            initial: this.state.value
           }
-        }
-        componentWillReceiveProps(next){
-          let id = getId(next);
+        });
+      }
 
-          if (id !== this.state.id){
-            this.props.dispatch({
-              type: 'local.swap',
-              payload: {
-                id: this.state.id,
-                next: id,
-                initial: getInitial(next)
-              }
-            });
-
-          }
-          this.setState({ id, value: next.local });
-        }
-        $ = (type, payload, more) => {
-          let action =  {
-            type: `${this.state.id}:${type}`,
-            payload,
-            meta: {
-              // this is just to be faster when reducing
-              id: this.state.id,
-              type,
-              local: true
-            }
-          };
-          if (more){
-            Object.assign(action, more);
-          }
-          return action;
-        };
-        render(){
-          return React.createElement(Target, {
-            ...this.props,
+      componentDidMount(){
+        if (saga){
+          this.runningSaga = this.context.sagas.run(saga, {
             $: this.$,
             ident: this.state.id,
-            dispatch: this.props.dispatch,
-            state: this.state.value,
-          }, this.props.children);
-        }
-        componentWillUnmount(){
-          this.props.dispatch({
-            type: 'local.unmount',
-            payload: {
-              id: this.id,
-              persist
-            }
+            getState: () => this.state.value
           });
-          if (this.runningSaga){
-            this.runningSaga.cancel();
-            delete this.runningSaga;
-          }
         }
       }
-    );
+
+      componentWillReceiveProps(next){
+        let id = getId(next);
+
+        if (id !== this.state.id){
+          this.props.dispatch({
+            type: 'local.swap',
+            payload: {
+              id: this.state.id,
+              next: id,
+              initial: getInitial(next)
+            }
+          });
+
+        }
+        this.setState({ id, value: next.local });
+      }
+
+      $ = (type, payload, more) => {
+        // 'localize' an event. super conveninent for actions 'local' to this component
+        let action =  {
+          type: `${this.state.id}:${type}`,
+          payload,
+          meta: {
+            // this is just to be faster when reducing
+            id: this.state.id,
+            type,
+            local: true
+          }
+        };
+        if (more){
+          Object.assign(action, more);
+        }
+        return action;
+      };
+
+      render(){
+        return React.createElement(Target, {
+          ...this.props,
+          $: this.$,
+          ident: this.state.id,
+          dispatch: this.props.dispatch,
+          state: this.state.value,
+        }, this.props.children);
+      }
+
+      componentWillUnmount(){
+        this.props.dispatch({
+          type: 'local.unmount',
+          payload: {
+            id: this.id,
+            persist
+          }
+        });
+        if (this.runningSaga){
+          this.runningSaga.cancel();
+          delete this.runningSaga;
+        }
+      }
+    }
+
+    return ReduxReactLocal;
   };
 }
 

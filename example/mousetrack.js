@@ -26,11 +26,11 @@ function events(target, event) {
 @local({
   ident: 'app',
   initial: {active: false},
-  reducer(state, {me, meta, payload}){
+  reducer(state, {me, meta, payload: {pageX, pageY} = {}}){
     if (me){
       switch (meta.type){
-        case 'mousedown': return {...state, x: payload.pageX, y: payload.pageY, active: true};
-        case 'mousemove': return {...state, x: payload.pageX, y: payload.pageY};
+        case 'mousedown': return {...state, x: pageX, y: pageY, active: true};
+        case 'mousemove': return {...state, x: pageX, y: pageY};
         case 'mouseup': return {...state, active: false};
       }
     }
