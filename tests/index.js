@@ -23,8 +23,6 @@
 import React, {Component, PropTypes} from 'react';
 import {render, unmountComponentAtNode} from 'react-dom';
 import {connect} from 'react-redux';
-import {findRenderedDOMComponentWithTag, Simulate} from 'react-addons-test-utils';
-
 import {put, cps, SagaCancellationException} from 'redux-saga';
 
 import {Root, local} from '../src';
