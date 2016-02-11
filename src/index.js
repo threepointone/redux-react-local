@@ -65,19 +65,19 @@ export function localReducer(state = {registered: {}}, action){
   // - local.unmount
 
   if (type === 'local.register'){
-    if (state.registered[payload.id] && state.registered[payload.id].reducer !== identity){
+    if (state.registered[payload.ident] && state.registered[payload.ident].reducer !== identity){
       // todo - throw, but not when hot reloading
-      console.warn(`${payload.id} already exists`);
+      console.warn(`${payload.ident} already exists`);
     }
-    if (payload.id === 'registered'){
+    if (payload.ident === 'registered'){
       throw new Error('cannot have an ident named `registered`, sorry!');
     }
     state = {
         ...state,
-        [payload.id] : state[payload.id] || payload.initial, // this way we can 'persist' across unmounts
+        [payload.ident] : state[payload.ident] !== undefined ? state[payload.ident] : payload.initial, // this way we can 'persist' across unmounts
         registered : {
           ...state.registered,
-          [payload.id]: {
+          [payload.ident]: {
             reducer: payload.reducer
           }
         }
@@ -95,7 +95,7 @@ export function localReducer(state = {registered: {}}, action){
     let a = action;
 
     // if this originated from the same key, then add me: true
-    if (meta && meta.local && key === meta.id){
+    if (meta && meta.local && key === meta.ident){
       a = {
         ...a,
         me: true
@@ -104,6 +104,9 @@ export function localReducer(state = {registered: {}}, action){
 
     // reduce
     let computed = state.registered[key].reducer(state[key], a);
+    if (computed === undefined){
+      console.warn(`did you forget to return state from the ${key} reducer?`);
+    }
 
     if (computed !== state[key]){
       changed = true;
@@ -121,10 +124,10 @@ export function localReducer(state = {registered: {}}, action){
     state = {
       ...state,
       // we can leave the data in place
-      [payload.id] : payload.persist ? state[payload.id] : undefined,
+      [payload.ident] : payload.persist ? state[payload.ident] : undefined,
       registered : {
         ...state.registered,
-        [payload.id]: {
+        [payload.ident]: {
           reducer: identity // signals that this is unmounted
         }
       }
@@ -180,7 +183,7 @@ export function local({
         this.props.dispatch({
           type: 'local.register',
           payload: {
-            id: this.state.id,
+            ident: this.state.id,
             reducer,
             initial: this.state.value
           }
@@ -204,7 +207,7 @@ export function local({
           this.props.dispatch({
             type: 'local.swap',
             payload: {
-              id: this.state.id,
+              ident: this.state.id,
               next: id,
               initial: getInitial(next)
             }
@@ -221,7 +224,7 @@ export function local({
           payload,
           meta: {
             // this is just to be faster when reducing
-            id: this.state.id,
+            ident: this.state.id,
             type,
             local: true
           }
@@ -246,7 +249,7 @@ export function local({
         this.props.dispatch({
           type: 'local.unmount',
           payload: {
-            id: this.id,
+            ident: this.state.id,
             persist
           }
         });

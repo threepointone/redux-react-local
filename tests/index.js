@@ -190,7 +190,7 @@ describe('redux-react-local', () => {
           type: 'app:name',
           payload: {some: 'payload'},
           meta: {
-            id: 'app',
+            ident: 'app',
             type: 'name',
             local: true
           }
