@@ -194,8 +194,8 @@ export function local({
           }
           this.setState({ id, value: next.local });
         }
-        $ = (type, payload) => {
-          return {
+        $ = (type, payload, more) => {
+          let action =  {
             type: `${this.state.id}:${type}`,
             payload,
             meta: {
@@ -205,6 +205,10 @@ export function local({
               local: true
             }
           };
+          if (more){
+            Object.assign(action, more);
+          }
+          return action;
         };
         render(){
           return React.createElement(Target, {
