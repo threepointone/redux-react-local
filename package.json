@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "babel src -d lib",
-    "test": " ./node_modules/.bin/babel-node ./node_modules/.bin/karma start tests/karma.conf.js --single-run"
+    "test": "NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/.bin/karma start tests/karma.conf.js --single-run"
   },
   "keywords": [
     "react",
