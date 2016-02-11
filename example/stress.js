@@ -20,7 +20,7 @@ class App extends Component {
 
   render() {
     return <div onClick={this.onClick}>
-      {times(100, i => <Cell id={i} key={i}/>)}
+      {times(10, i => <Cell id={i} key={i}/>)}
     </div>;
   }
 }
