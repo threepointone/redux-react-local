@@ -22,7 +22,7 @@ local({
     // reduce on other global dispatches here
     return state;
   },
-  saga: function* (_, {getState, $}){
+  *saga(_, {getState, $}){
     // via redux-saga
   }
 })
