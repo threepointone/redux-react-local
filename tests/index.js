@@ -255,7 +255,7 @@ describe('redux-react-local', () => {
     let started = false;
     @local({
       ident: 'app',
-      saga: function*(){
+      *saga(){
         started = true;
         yield cps(sleep, 300);
         done();
@@ -280,7 +280,7 @@ describe('redux-react-local', () => {
     let unmounted = false;
     @local({
       ident: 'app',
-      saga: function*(){
+      *saga(){
         try {
           while (true){
             yield cps(sleep, 100);
@@ -313,7 +313,7 @@ describe('redux-react-local', () => {
 
     @local({
       ident: 'app',
-      saga: function*(_, {ident}){
+      *saga(_, {ident}){
         expect(ident).toEqual('app');
         done();
       }
@@ -341,7 +341,7 @@ describe('redux-react-local', () => {
         return state;
 
       },
-      saga: function*(_, {$}){
+      *saga(_, {$}){
         yield put($('localE', {x: 1}));
         yield put({type: 'globalE', payload: {x: 10}});
         expect(node.innerText).toEqual('20');
@@ -368,7 +368,7 @@ describe('redux-react-local', () => {
         }
         return state;
       },
-      saga: function*(getState, loco){
+      *saga(getState, loco){
         yield put(loco.$('increment'));
         yield put(loco.$('increment'));
         expect(loco.getState()).toEqual(2);

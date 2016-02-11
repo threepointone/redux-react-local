@@ -17,10 +17,9 @@ function times(n, fn){
 }
 
 class App extends Component {
-
   render() {
     return <div onClick={this.onClick}>
-      {times(200, i => <Cell id={i} key={i}/>)}
+      {times(400, i => <Cell id={i} key={i} />)}
     </div>;
   }
 }
@@ -48,7 +47,7 @@ function ltoRgb(l){
 @local({
   ident: ({id}) => `cell:${id}`,
   initial: () => ({
-    period: Math.random() * 200,
+    period: Math.random() * 8000,
     brightness: Math.random() * 100
   }),
   reducer: (state, {payload, meta, me}) => {
@@ -62,7 +61,7 @@ function ltoRgb(l){
     }
     return state;
   },
-  saga: function*(_, {getState, $}){
+  *saga(_, {getState, $}){
     while (true){
       yield cps(sleep, getState().period);
       yield put($('tick', Math.random() * 100));
