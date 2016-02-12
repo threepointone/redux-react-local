@@ -51,6 +51,11 @@ function log(...args){
   return this;
 }
 
+function omit(obj, key) {
+  return Object.keys(obj).reduce( (o, k) => {
+    return k === key ? o : { ...o, [k]: obj[k] };
+  });
+}
 
 export class Root extends Component{
   static propTypes = {
@@ -191,12 +196,12 @@ export function localReducer(state = {registered: {}}, action){
       ...state,
       // we can leave the data in place
       [payload.ident] : payload.persist ? state[payload.ident] : undefined,
-      registered : {
+      registered : payload.persist ? {
         ...state.registered,
         [payload.ident]: {
           reducer: identity // signals that this is unmounted
         }
-      }
+      } : omit(state.registered, payload.ident)
     };
   }
 
