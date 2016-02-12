@@ -74,7 +74,9 @@ export function localReducer(state = {registered: {}}, action){
     }
     state = {
         ...state,
-        [payload.ident] : state[payload.ident] !== undefined ? state[payload.ident] : payload.initial, // this way we can 'persist' across unmounts
+        [payload.ident] : state[payload.ident] !== undefined ? state[payload.ident] : payload.initial,
+        // this way we can 'persist' across unmounts
+        // also makes preloading data simple
         registered : {
           ...state.registered,
           [payload.ident]: {

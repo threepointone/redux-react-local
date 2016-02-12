@@ -7,8 +7,8 @@ import {local, Root} from '../src';
 @local({
   ident: 'app',
   initial: 0,
-  reducer(state, {me, meta = {}}){
-    if (me && meta.type === 'increment'){
+  reducer(state, {me, meta: {type} = {}}){
+    if (me && type === 'increment'){
       return state + 1;
     }
     return state;
