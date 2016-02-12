@@ -124,7 +124,7 @@ export function localReducer(state = {registered: {}}, action){
     // shortcircuit
     return {
       ...state,
-      [meta.ident]: {...state[meta.ident], ...payload}
+      [meta.ident]: payload
     };
   }
 
