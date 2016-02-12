@@ -2,7 +2,43 @@ import React, {PropTypes, Component} from 'react';
 import { Provider, connect } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 import optimist from 'redux-optimist';
-// import ensureFSAMiddleware from '@meadow/redux-ensure-fsa';
+
+// like '@meadow/redux-ensure-fsa', but allows `optimist` as a key
+
+import isPlainObject from 'lodash.isplainobject';
+
+const validKeys = [
+  'type',
+  'payload',
+  'error',
+  'meta',
+  'optimist'
+];
+
+function isValidKey(key) {
+  return validKeys.indexOf(key) > -1;
+}
+
+export function isFSA(action) {
+  return (
+    isPlainObject(action) &&
+    typeof action.type !== 'undefined' &&
+    Object.keys(action).every(isValidKey)
+  );
+}
+
+
+
+function ensureFSAMiddleware () {
+  return next => action => {
+    if (!isFSA(action)) {
+      console.log(action); // eslint-disable-line
+      throw new Error('Flux Standard Action Violation: Actions must only have type, payload, error, optimist, and/or meta properties.');
+    }
+
+    return next(action);
+  };
+}
 
 import { batchedSubscribe } from 'redux-batched-subscribe';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
@@ -53,7 +89,7 @@ export class Root extends Component{
     // middleware
     ...this.props.middleware,
     this.sagas,
-    // ensureFSAMiddleware // todo - only for development
+    ensureFSAMiddleware // todo - only for development
   ), batchedSubscribe(batchedUpdates)));
   static childContextTypes = {
     sagas: PropTypes.func,
@@ -227,7 +263,8 @@ export function local({
             $: this.$,
             $opt: this.$opt,
             ident: this.state.id,
-            getState: () => this.state.value
+            getState: () => this.state.value,
+            setState: this._setState
           });
         }
       }
@@ -270,6 +307,10 @@ export function local({
         return action;
       };
 
+      _setState = state => {
+        this.props.dispatch(this.$('setState', state));
+      };
+
       $opt = this.context.optimist(this.$);
 
       render(){
@@ -279,7 +320,8 @@ export function local({
           ident: this.state.id,
           dispatch: this.props.dispatch,
           state: this.state.value,
-          $opt: this.$opt
+          $opt: this.$opt,
+          setState: this._setState
         }, this.props.children);
       }
 

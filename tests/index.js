@@ -258,8 +258,8 @@ describe('redux-react-local', () => {
     })
     class App extends Component{
       componentDidMount(){
-        let {dispatch, $, state} = this.props;
-        dispatch($('setState', {value: state.value + 1}));
+        let {setState, state} = this.props;
+        setState({value: state.value + 1});
       }
       render(){
         let {value} = this.props.state;
@@ -407,7 +407,7 @@ describe('redux-react-local', () => {
 
   });
 
-  it('optimistic updates:commit', () => {
+  it('optimistic updates', () => {
 
     @local({
       ident: 'app',
@@ -425,16 +425,12 @@ describe('redux-react-local', () => {
     })
     class App extends Component{
       componentDidMount(){
-
         let {dispatch, $opt} = this.props;
         let o = $opt('act');
 
         dispatch(o.begin({w: 1}));
-
         // dispatch(o.commit({w: 5}));
-
         dispatch(o.revert({w: 5}));
-
       }
       render(){
         return <div>{JSON.stringify(this.props.state)}</div>;
@@ -447,7 +443,5 @@ describe('redux-react-local', () => {
     }));
 
   });
-
-
 });
 
