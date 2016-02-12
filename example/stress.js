@@ -3,7 +3,7 @@ import {render} from 'react-dom';
 import {Root, local} from '../src';
 import {cps, put} from 'redux-saga';
 
-import styles from 'stress.css';
+import styles from './stress.css';
 
 function sleep(period, done){
   setTimeout(() => done(null, true), period);
@@ -26,16 +26,10 @@ function ltoRgb(l){
     period: Math.random() * 8000,
     brightness: Math.random() * 100
   }),
-  reducer: (state, {payload, meta, me}) => {
-    if (me && meta.type === 'tick'){
-      return { ...state, brightness: payload };
-    }
-    return state;
-  },
   *saga(_, {getState, $}){
     while (true){
       yield cps(sleep, getState().period);
-      yield put($('tick', Math.random() * 100));
+      yield put($('setState', {brightness: Math.random() * 100}));
     }
   }
 })

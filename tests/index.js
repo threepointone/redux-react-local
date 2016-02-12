@@ -250,6 +250,28 @@ describe('redux-react-local', () => {
 
   });
 
+  it(`can 'setState' locally`, () => {
+
+    @local({
+      ident: 'app',
+      initial: {value: 0}
+    })
+    class App extends Component{
+      componentDidMount(){
+        let {dispatch, $, state} = this.props;
+        dispatch($('setState', {value: state.value + 1}));
+      }
+      render(){
+        let {value} = this.props.state;
+        return <div>{value}</div>;
+      }
+    }
+
+    render(<Root><App /></Root>, node);
+    expect(node.innerText).toEqual('1');
+
+  });
+
   // sagas
   it('accepts a saga', done => {
     let started = false;
@@ -382,6 +404,47 @@ describe('redux-react-local', () => {
       }
     }
     render(<Root><App /></Root>, node);
+
+  });
+
+  it('optimistic updates:commit', () => {
+
+    @local({
+      ident: 'app',
+      initial: {x: 0, y: 0, z: 0},
+      reducer(state, {me, meta, payload} = {}){
+        if (me){
+          switch (meta.type){
+            case 'act': return {...state, x: 1, y: 2, w: payload.w};
+            case 'act:done': return {...state, x: 2, z: 3, w: payload.w};
+            case 'act:fail': return {...state, y: 5, z: 9, w: payload.w};
+          }
+        }
+        return state;
+      }
+    })
+    class App extends Component{
+      componentDidMount(){
+
+        let {dispatch, $opt} = this.props;
+        let o = $opt('act');
+
+        dispatch(o.begin({w: 1}));
+
+        // dispatch(o.commit({w: 5}));
+
+        dispatch(o.revert({w: 5}));
+
+      }
+      render(){
+        return <div>{JSON.stringify(this.props.state)}</div>;
+      }
+    }
+    render(<Root><App /></Root>, node);
+
+    expect(node.innerText).toEqual(JSON.stringify({
+      x: 0, y: 5, z: 9, w: 5
+    }));
 
   });
 

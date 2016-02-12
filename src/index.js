@@ -25,6 +25,23 @@ export class Root extends Component{
     middleware: [],
     reducers: {}
   };
+  nextTransactionID = 0;
+  optimist = ($) => {
+    let id = this.nextTransactionID++;
+    return function(name){
+      return {
+        begin(payload){
+          return $(name, payload, {optimist: {type: optimist.BEGIN, id}});
+        },
+        commit(payload){
+          return $(name + ':done', payload, {optimist: {type: optimist.COMMIT, id}});
+        },
+        revert(payload){
+          return $(name + ':fail', payload, {optimist: {type: optimist.REVERT, id}});
+        }
+      };
+    };
+  };
   sagas = createSagaMiddleware();
   store = createStore(optimist(combineReducers({
     // reducers
@@ -39,13 +56,16 @@ export class Root extends Component{
     // ensureFSAMiddleware // todo - only for development
   ), batchedSubscribe(batchedUpdates)));
   static childContextTypes = {
-    sagas: PropTypes.func
+    sagas: PropTypes.func,
+    optimist: PropTypes.func
   };
   getChildContext(){
     return {
-      sagas: this.sagas
+      sagas: this.sagas,
+      optimist: this.optimist
     };
   }
+
   render(){
     return <Provider store={this.store}>
       {this.props.children}
@@ -59,10 +79,18 @@ const identity = x => x;
 export function localReducer(state = {registered: {}}, action){
   let {payload, type, meta} = action;
   // this is the test sequence -
+  // - setState
   // - local.register
   // - local.swap
   // - then reduce on all local keys
   // - local.unmount
+  if (meta && meta.local && meta.type === 'setState'){
+    // shortcircuit
+    return {
+      ...state,
+      [meta.ident]: {...state[meta.ident], ...payload}
+    };
+  }
 
   if (type === 'local.register'){
     if (state.registered[payload.ident] && state.registered[payload.ident].reducer !== identity){
@@ -173,7 +201,8 @@ export function local({
     class ReduxReactLocal extends Component{
       static displayName = 'local:' + (Target.displayName || Target.name);
       static contextTypes = {
-        sagas: PropTypes.func
+        sagas: PropTypes.func,
+        optimist: PropTypes.func
       };
 
       state = {
@@ -196,6 +225,7 @@ export function local({
         if (saga){
           this.runningSaga = this.context.sagas.run(saga, {
             $: this.$,
+            $opt: this.$opt,
             ident: this.state.id,
             getState: () => this.state.value
           });
@@ -240,6 +270,8 @@ export function local({
         return action;
       };
 
+      $opt = this.context.optimist(this.$);
+
       render(){
         return React.createElement(Target, {
           ...this.props,
@@ -247,6 +279,7 @@ export function local({
           ident: this.state.id,
           dispatch: this.props.dispatch,
           state: this.state.value,
+          $opt: this.$opt
         }, this.props.children);
       }
 
