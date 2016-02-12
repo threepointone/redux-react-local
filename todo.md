@@ -4,4 +4,5 @@
 - bring back the setState action
 - saga combinators
 - a better way to integrate with existing redux apps
-- test for undefined from reducers
+- internal ensure-fsa
+- ✔ test for undefined from reducers

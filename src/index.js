@@ -218,6 +218,9 @@ export function local({
       }
 
       $ = (type, payload, more) => {
+        if (typeof type !== 'string'){
+          throw new Error('invalid event');
+        }
         // 'localize' an event. super conveninent for actions 'local' to this component
         let action =  {
           type: `${this.state.id}:${type}`,

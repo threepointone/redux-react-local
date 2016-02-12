@@ -55,15 +55,15 @@ decorator for a react component
 
 actions in reducers get annotated with data to assist in reducing. an action that originated in the same component will have `action.me === true`. further, `action.meta.type` will contain be as it originated. note - you must wrap your actions with `$()` to ensure this behavior.
 
-sagas are started once the component mounts, and gets passed a callback to get redux state. it also gets passed an object with `$()`, a locally scoped `getState()`, and the `id` of the component.
+sagas are started once the component mounts, and gets passed a callback to get redux state. it also gets passed an object with `$()`, a locally scoped `getState()`, and the `ident` of the component.
 
 passed props
 ---
 
-- dispatch - via redux
-- $ - helper to locally scope an action
-- state
-- ident
+- `dispatch` - via redux
+- `$` - helper to locally scope an action
+- `state`
+- `ident`
 
 
 Root
