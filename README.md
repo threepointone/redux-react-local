@@ -71,22 +71,22 @@ Use `<Root/>` to wrap your app; this sets up the redux store and associated plum
 rationale
 ---
 
-This assumes that you have some familiarity with [React](https://facebook.github.io/react/) and [redux](http://redux.js.org/).
+(This assumes some familiarity with [React](https://facebook.github.io/react/) and [redux](http://redux.js.org/))
 
-Ok, so - React's 'components' are awesome, and lets us describe our UIs as hierarchies. Lovely. I'm a big fan of architectures that are 'fractal' - where the 'big' elements can be 'composed' of similar looking smaller ones, and react's components fit the bill. (Other examples - functions, observables, channels, js objects(!), etc) <sup id="s1">[1](#f1)</sup>
+So, React's 'components' are awesome, and lets us describe our UIs as trees/hierarchies. Lovely. I'm a big fan of architectures that are 'fractal' - where the 'big' elements are 'composed' of similar looking smaller ones, and React's components fit the bill. (Other examples - functions, observables, channels, js objects(!), etc) <sup id="s1">[1](#f1)</sup>
 
-However, because 'views' don't have global 'references'/identities ala Backbone etc, 'talking' between these components can get cumbersome <sup id="s2">[2](#f2)</sup>; we then resort to building *some* form of messaging system external to these components - callbacks, pubsub channels, redux stores, observable event chains, etc. The smart ones use `context` to expose these systems to a particular render tree, avoiding 'global' state, but still getting a similar model.
+However, because 'views' don't have global references / identities ala Backbone etc, communicating between these components can get cumbersome <sup id="s2">[2](#f2)</sup>; we then resort to building *some* form of messaging system external to these components - callbacks, pubsub channels, flux stores, observable event chains, etc. The smart ones use `context` to expose these systems to a particular render tree, avoiding 'global' state, but still getting a similar model.
 
-Redux in particular has become a popular implementation of the flux pattern - all application state is held in one js object, where the value of each of its keys correspond to a 'reducer' function that gets called on every 'action' that's 'dispatched'. Components / external sources can then dispatch actions to 'effect' state in a controlled manner. Very nice.
+Redux is a popular implementation of the [flux](https://facebook.github.io/flux/) pattern - all application state is held in one js object, where the value of each of its keys correspond to a 'reducer' function that gets called on every 'action' that's 'dispatched'. Components / external sources can then dispatch actions to 'effect' state in a controlled manner. Very nice.
 
 Redux expects you to declare all your reducers outright at the beginning of the app's lifecycle. This is great for state that -
 
-1. will exist through the lifecycle of the app
-2. makes sense 'across' the app. eg - currently logged in user details, databases/caches, mouse/touch positions, etc.
+- will exist through the lifecycle of the app
+- makes sense 'across' the app. eg - currently logged in user details, databases/caches, mouse/touch positions, etc.
+- isn't usually associated with a specific component on the page (unless that component is alive for the life of the app)
 
-This state isn't usually specific to a particular component on the page, and will keep reducing on actions till the app exits.
 
-However, this approach doesn't work well for 'dynamic' components that might pop in and out of existence. For example - Imagine a dynamically fetched list of tweets (length unknown till after fetch), each with buttons to like/retweet etc. When hovering/clicking these buttons, we'd need to store this state *somewhere*. Options -
+However, this approach doesn't work well for 'dynamic' components that might pop in and out of existence. eg - imagine a dynamically fetched list of tweets (length unknown till after fetch), each with buttons to like/retweet etc. When hovering/clicking these buttons, we'd need to store this state *somewhere*. Options -
 
 1. We use `this.setState()`, but then that state is opaque to the rest of the app. We'd have to dispatch actions on every `setState`, and then have extra logic to differentiate based on type *and* some form of id, and this is already getting out of hand...
 2. We store an array of components states, indexed by some key/id, and update that as and when. However, this collection's 'information' was already available in the *react tree itself*, and it's a shame we don't use it.
@@ -95,7 +95,7 @@ However, this approach doesn't work well for 'dynamic' components that might pop
 
 With the above issues, we lose the fractal nature of our architecture. which makes me a sad puppy. Sad puppies are officially considered an animal rights violation, so we have to do something about it.
 
-What I'd really like to do is be able to
+What I'd really like to do is -
 
 - define a reducer for a component's local 'state'
 - that's called for all actions across the app
@@ -107,7 +107,7 @@ What I'd really like to do is be able to
 
 [drum roll...]
 
-redux-react-local to the rescue! At its simplest, it looks like this -
+`redux-react-local` to the rescue! At its simplest, it looks like this -
 
 ```jsx
 @local({
@@ -134,7 +134,7 @@ render(<Root><App/></Root>, window.app);
 
 We use a `<Root>` component to wrap the whole tree; this sets up a redux store and other plumbing. We then annotate our components with a `@local` decorator declaring -
 
-- `ident` - short for 'identity', we use this value as a key on our internal store, among other things. This is either a string ('app', 'inbox', etc), or a function that receives this components `props` and returns a string.
+- `ident` - short for 'identity', we use this value as a key on our internal store, among other things. This is either a string ('app', 'inbox', etc), or a function that receives this component's `props` and returns a string.
 - `initial` - initial state for this component. Can also be a function that receives `props` and returns the initial state.
 - `reducer` - a reducer for local state; recieves all actions that flow through the redux store.
 - `*saga` - (more on this in a bit)
