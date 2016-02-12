@@ -149,7 +149,7 @@ The wrapped component will then recieve these props -
 'local' actions
 ---
 
-We need a way to generate actions that are 'local' to the component that's dispatching them. To that effect, we use `$` which accepts a `type` and a `payload`, and generates an action that's associated with the current component. It looks like this -
+We need a way to generate actions that are 'local' to the component that's dispatching them. We can use `$` which accepts a `type` and a `payload`, and generates an action that's associated with the current component. It looks like this -
 ```jsx
 $('someAction', {some: 'payload'}, moreStuff)
 
@@ -168,16 +168,16 @@ $('someAction', {some: 'payload'}, moreStuff)
 }
 ```
 
-Further, when reducing these actions locally, we can tell when a reducer is local to a given action, and add a flag saying so, making it easy to 'recognize' these events in your reducer.
+Further, when reducing these actions, we can 'recognize' these actions.
 
 ```jsx
-reducer(state, {me, meta}){
+reducer(state, {me, meta, payload}){
   if(me){ // happened locally!
     switch(meta.type){
       case 'someAction': //...
     }
   }
-  // you can 'listen' to all other global dispatches here
+  // you could 'listen' to all other global dispatches here
   return state;
 }
 ```
