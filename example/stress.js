@@ -23,13 +23,14 @@ function ltoRgb(l){
 @local({
   ident: ({id}) => `cell:${id}`,
   initial: () => ({
-    period: Math.random() * 8000,
+    period: Math.random() * 12000,
     brightness: Math.random() * 100
   }),
   *saga(_, {getState, $}){
     while (true){
-      yield cps(sleep, getState().period);
-      yield put($('setState', {brightness: Math.random() * 100}));
+      let {period} = getState();
+      yield cps(sleep, period);
+      yield put($('setState', {period: period, brightness: Math.random() * 100}));
     }
   }
 })
@@ -51,7 +52,7 @@ function times(n, fn){
 class App extends Component {
   render() {
     return <div onClick={this.onClick}>
-      {times(400, i => <Cell id={i} key={i} />)}
+      {times(500, i => <Cell id={i} key={i} />)}
     </div>;
   }
 }
