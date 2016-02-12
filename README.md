@@ -33,7 +33,7 @@ class App({state, dispatch, $}){
   }
 }
 
-render(<Root><App/></App></Root>, /* ... */);
+render(<Root><App/></Root>, /* ... */);
 
 ```
 
