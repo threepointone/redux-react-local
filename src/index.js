@@ -36,8 +36,8 @@ export class Root extends Component{
         commit(payload){
           return $(name + ':done', payload, {optimist: {type: optimist.COMMIT, id}});
         },
-        revert(payload){
-          return $(name + ':fail', payload, {optimist: {type: optimist.REVERT, id}});
+        revert(payload, error){
+          return $(name + ':fail', payload, {optimist: {type: optimist.REVERT, id, error}});
         }
       };
     };

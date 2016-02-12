@@ -225,6 +225,18 @@ Simlarly for html - writing 'inline html' is a bad practice, and we're told to u
 redux-react-local is a similar effort, letting you colocate state, behavior, and components, while treating it as a global concern. I hope this helps you in some way!
 
 
+optimistic updates
+---
+
+[pending docs](https://github.com/threepointone/redux-react-local/issues/5)
+
+
+`setState` as an action
+---
+
+[pending docs](https://twitter.com/threepointone/status/698135547907190784)
+
+
 footnotes
 ---
 
