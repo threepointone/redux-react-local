@@ -209,7 +209,7 @@ This saga recieves these arguments
   - `getState`- returns this component's state
 
 
-This gives us our own little 'event loop'/'process' for the component, with all the other goodies from redux-saga. Nice! See the [mousetracking example](https://github.com/threepointone/redux-react-local/blob/master/example/mousetrack.js) for usage. <sup id="s3">[1](#f3)</sup>
+This gives us our own little 'event loop'/'process' for the component, with all the other goodies from redux-saga. Nice! See the [mousetracking example](https://github.com/threepointone/redux-react-local/blob/master/example/mousetrack.js) for usage.
 
 spiel
 ---
@@ -231,7 +231,4 @@ footnotes
 <b id="f1">[1]</b>  'classes' are *not* fractal, because inheritance mashes methods and properties on a flat level. This gets out of hand quickly, and doesn't satisfy the big-small charecteristic of fractals. react sidesteps this problem by making an inheritance chain exactly one step deep (React.Component) - and discourages further extension, instead excouraging HOCs (higher order components) and other functional-friendly ways of composition (stateless functional components, etc). [↩](#s1)
 
 <b id="f2">[2]</b> Truly, this was one of the advantages of the MVC model, being able to reference components in an app easily. Sure, it led to so called 'spaghetti' code, but the mental model itself was nice (also see - MVVM, etc) [↩](#s2)
-
-<b id="f3">[3]</b> currently, inside a saga, it's cumbersome to `take` an action from *another* component where the ident is dynamically generated, unless you have out-of-band knowledge of this ident. This can be alleviated by helpers on data from the 'global' `getState`, and/or dispatching simpler 'global' actions from that component's saga, but it isn't ideal. Open to suggestions! [↩](#s3)
-
 
