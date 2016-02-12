@@ -25,8 +25,9 @@ import {Root, local} from 'redux-react-local';
     // via redux-saga
   }
 })
-class App({state, dispatch, $}){
+class App extends React.Component{
   render(){
+    let {state, dispatch, $} = this.props;
     return <div onClick={() => dispatch($('increment'))>
       clicked {state.count} times
     </div>;
