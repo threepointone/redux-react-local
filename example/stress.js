@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {Root, local} from '../src';
 import {cps, put} from 'redux-saga';
+import {Saga} from '../src/sagas';
 
 import styles from './stress.css';
 
@@ -25,19 +26,23 @@ function ltoRgb(l){
   initial: () => ({
     period: Math.random() * 12000,
     brightness: Math.random() * 100
-  }),
-  *saga(_, {getState, setState}){
+  })
+})
+class Cell extends Component{
+  *saga(_, {period, setState}){
     while (true){
-      let {period} = getState();
       yield cps(sleep, period);
       yield put(setState({period: period, brightness: Math.random() * 100}));
     }
   }
-})
-class Cell extends Component{
+  _local = () => {
+    return this.props.local;
+  };
   render(){
     let {brightness} = this.props.state;
-    return <div className={styles.cell} style={{backgroundColor: ltoRgb(brightness)}} />;
+    return <div className={styles.cell} style={{backgroundColor: ltoRgb(brightness)}} >
+      <Saga saga={this.saga} period={this.props.state.period} setState={this.props.setState} />
+    </div>;
   }
 }
 
