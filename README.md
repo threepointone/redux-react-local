@@ -3,6 +3,10 @@ redux-react-local
 
 `npm install redux-react-local --save`
 
+warning: the api's in a state of flux right now
+
+(badum-tsh)
+
 tl;dr
 
 ```jsx
