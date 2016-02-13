@@ -217,7 +217,7 @@ Similar to the above, what I really want is -
 - that 'lives' for the life of that component
 - friendly with the above reducing system
 
-tada, redux-react-local already does this! Just declare a <Saga/> in your react tree somewhere. It looks like this -
+tada, redux-react-local already does this! Just declare a `<Saga/>` in your react tree somewhere. It looks like this -
 ```jsx
 let run = function*(getState, props){
   // ...
