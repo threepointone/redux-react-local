@@ -1,14 +1,14 @@
 module.exports = function(config){
   config.set({
     browsers: ['Chrome'],
-    files: ['../node_modules/babel-polyfill/dist/polyfill.js', './index.js'],
+    files: ['../node_modules/babel-polyfill/dist/polyfill.js', './index.js', './sagas.js'],
     reporters: ['mocha', 'coverage'],
     mochaReporter: {
       output: 'autowatch'
     },
     preprocessors: {
       '../src/*.js': ['coverage'],
-      './index.js': ['webpack'],
+      './*.js': ['webpack'],
     },
     webpack: {
       module: {

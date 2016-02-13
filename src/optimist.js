@@ -1,8 +1,11 @@
 import {PropTypes, Component, Children} from 'react';
-import {BEGIN, COMMIT, REVERT} from 'redux-optimist';
+import optimist, {BEGIN, COMMIT, REVERT} from 'redux-optimist';
 
 export class Optimist extends Component{
+  static wrap = optimist;
+
   transactionID = 0;
+
   optimist = name => {
     const id = this.transactionID++;
     return {
@@ -23,14 +26,17 @@ export class Optimist extends Component{
       })
     };
   };
+
   static childContextTypes = {
     optimist: PropTypes.func
   };
+
   getChildContext(){
     return {
       optimist: this.optimist
     };
   }
+
   render(){
     return Children.only(this.props.children);
   }

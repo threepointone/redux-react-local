@@ -87,19 +87,22 @@ export default function localReducer(state = {registered: {}}, action){
   }
 
   if (type === 'local.unmount'){
-    state = {
-      ...state,
-      // we can leave the data in place
-      [payload.ident] : payload.persist ? state[payload.ident] : undefined,
-      registered : payload.persist ? {
-        ...state.registered,
-        [payload.ident]: {
-          reducer: identity // signals that this is unmounted
+    if (payload.persist){
+      state = {
+        ...state,
+        registered: {
+          ...state.registered,
+          [payload.ident]: {reducer: identity}
         }
-      } : omit(state.registered, payload.ident)
-    };
+      };
+    }
+    else {
+      state = {
+        ...omit(state, payload.ident),
+        registered: omit(state.registered, payload.ident)
+      };
+    }
   }
 
   return state;
-
 }

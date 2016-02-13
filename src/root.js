@@ -5,11 +5,9 @@ import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
 import {Provider} from 'react-redux';
 
 // redux-saga
-import createSagaMiddleware from 'redux-saga';
 import {Sagas} from './sagas';
 
 // optimist
-import optimist from 'redux-optimist';
 import {Optimist} from './optimist';
 
 // redux-react-local
@@ -20,6 +18,21 @@ import ensureFSA from './ensure-fsa';
 import {batchedSubscribe} from 'redux-batched-subscribe';
 import {unstable_batchedUpdates as batchedUpdates} from 'react-dom';
 
+function makeStore(reducers = {}, initial = {}, middleware = []){
+  // create a redux store
+  return createStore(
+    // reducer
+    Optimist.wrap(combineReducers({
+      ...reducers || {},
+      local: localReducer
+    })),
+    // initial state
+    initial || {},
+    // middleware
+    compose(applyMiddleware(...middleware), batchedSubscribe(batchedUpdates))
+  );
+}
+
 
 export default class Root extends Component{
   // optionally accept middleware/reducers to add on to the redux store
@@ -27,21 +40,6 @@ export default class Root extends Component{
     middleware: PropTypes.array,
     reducers: PropTypes.object
   };
-
-  createStore(){
-    // create a redux store
-    return createStore(
-      // reducer
-      optimist(combineReducers({
-        ...this.props.reducers || {},
-        local: localReducer
-      })),
-      // initial state
-      this.props.initial || {},
-      // middleware
-      compose(applyMiddleware(...this.middle()), batchedSubscribe(batchedUpdates))
-    );
-  }
 
   *middle(){
     if (this.props.middleware){
@@ -53,9 +51,13 @@ export default class Root extends Component{
     }
   }
 
-  sagaMiddleware = createSagaMiddleware();
+  sagaMiddleware = Sagas.createSagaMiddleware();
 
-  store = this.createStore();
+  store = makeStore(
+    this.props.reducers,
+    this.props.initial,
+    this.middle()
+  );
 
   render(){
     return <Provider store={this.store}>

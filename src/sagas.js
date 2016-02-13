@@ -1,6 +1,8 @@
 import {PropTypes, Children, Component} from 'react';
+import createSagaMiddleware from 'redux-saga';
 
 export class Sagas extends Component{
+  static createSagaMiddleware = createSagaMiddleware;
   static propTypes = {
     middleware: PropTypes.func.isRequired
   };
