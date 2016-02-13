@@ -18,15 +18,12 @@ import {Root, local} from 'redux-react-local';
   initial: {count: 0},
   // optionally -
   reducer(state, action){
-    if(action.me){
+    if(action.me){ // happened 'locally'
       switch(action.meta.type){
       // increment decrement etc
     }
     // reduce on other global dispatches here
     return state;
-  },
-  *saga(_, {getState, $}){
-    // via redux-saga
   }
 })
 class App extends React.Component{
@@ -52,23 +49,25 @@ decorator for a react component
 - `initial` - initial local state
 - `initial (props)` - a function that returns the above
 - `reducer (state, {type, payload, meta, me})` - a local reducer on every action on the store, `me` will be true for actions dispatched locally, and `meta.type` will not have the `${ident}:` prefix
-- `*saga (getState, {$, dispatch, getState})` - via [redux-saga](https://github.com/yelouafi/redux-saga/), will 'live' for the lifetime of this component
 
 
 passed props
 ---
 
 - `ident` - as above
-- `dispatch` - via redux
+- `dispatch(action)` - via redux
 - `$` - helper to locally scope an action
 - `state` - current local state
+- `setState(state)`
 
 
 Root
 ---
 
-- `middleware` - an array of redux middleware
 - `reducers` - an object with reducers
+- `initial` - initial state of the redux store
+- `middleware` - an array of redux middleware
+
 
 Use `<Root/>` to wrap your app; this sets up the redux store and associated plumbing.
 
@@ -142,7 +141,7 @@ We use a `<Root>` component to wrap the whole tree; this sets up a redux store a
 - `ident` - short for 'identity', we use this value as a key on our internal store, among other things. This is either a string ('app', 'inbox', etc), or a function that receives this component's `props` and returns a string.
 - `initial` - initial state for this component. Can also be a function that receives `props` and returns the initial state.
 - `reducer` - a reducer for local state; recieves all actions that flow through the redux store.
-- `*saga` - (more on this in a bit)
+- `persist` - (experimental) a boolean indicating whether to 'keep' the state after the component has unmounted
 
 The wrapped component will then recieve these props -
 
@@ -150,26 +149,29 @@ The wrapped component will then recieve these props -
 - `state` - current local state
 - `ident` - as above
 - `$` - a helper function to 'localize' actions.
+- `setState` - a helper to set a value directly to the local store. Unlike react's `setState`, this does *not* merge values.
 
 'local' actions
 ---
 
 We need a way to generate actions that are 'local' to the component that's dispatching them. We can use `$` which accepts a `type` and a `payload`, and generates an action that's associated with the current component. It looks like this -
 ```jsx
-$('someAction', {some: 'payload'}, moreStuff)
+$({
+  type: 'someAction',
+  payload: {some: 'payload'},
+  ...moreStuff
+})
 
 // generates -
 
 {
   type: `${ident}:someAction`,
-  payload: {
-    some: 'payload'
-  },
+  payload: {some: 'payload'},
+  ...moreStuff,
   meta: {
     ident: ident,
     type: 'someAction'
-  },
-  ...moreStuff
+  }
 }
 ```
 
@@ -189,33 +191,6 @@ reducer(state, {me, meta, payload}){
 
 Convenient!
 
-
-sagas
----
-(This assumes familiarity with [redux-saga](https://github.com/yelouafi/redux-saga/). Check it out, it's the absolute bees knees.)
-
-If you've used redux-saga, you'll notice that sagas share the same fractal-breaking problem as redux reducers - you have to declare/run them at the very start, they run for the entire lifecycle of the app, and aren't friendly with transient components.
-
-Similar to the above, what I really want is -
-
-- declare a saga corresponding to a component
-- that 'lives' for the life of that component
-- friendly with the above reducing system
-
-
-tada, redux-react-local already does this! Just declare a `*saga` generator in the annotation.
-
-This saga recieves these arguments
-
-- `getState` - same as redux's getState
-- an object with -
-  - `$` same localization helper as above
-  - `ident` corresponding to the component
-  - `getState`- returns this component's state
-
-
-This gives us our own little 'event loop'/'process' for the component, with all the other goodies from redux-saga. Nice! See the [mousetracking example](https://github.com/threepointone/redux-react-local/blob/master/example/mousetrack.js) for usage.
-
 spiel
 ---
 
@@ -230,16 +205,40 @@ Simlarly for html - writing 'inline html' is a bad practice, and we're told to u
 redux-react-local is a similar effort, letting you colocate state, behavior, and components, while treating it as a global concern. I hope this helps you in some way!
 
 
-optimistic updates
+extra - sagas
+---
+(This assumes familiarity with [redux-saga](https://github.com/yelouafi/redux-saga/). Check it out, it's the absolute bees knees.)
+
+If you've used redux-saga, you'll notice that sagas share the same fractal-breaking problem as redux reducers - you have to declare/run them at the very start, they run for the entire lifecycle of the app, and aren't friendly with transient components.
+
+Similar to the above, what I really want is -
+
+- declare a saga as a component
+- that 'lives' for the life of that component
+- friendly with the above reducing system
+
+tada, redux-react-local already does this! Just declare a <Saga/> in your react tree somewhere. It looks like this -
+```jsx`
+let run = function*(getState, props){
+  // ...
+}
+
+// ...
+<Saga saga={run} {...props} />
+```
+
+This saga 'lives' while it's in the tree, and gets cancelled when it unmounts.
+
+This gives us our own little 'event loop'/'process' for the component, with all the other goodies from redux-saga. Nice! See the [mousetracking example](https://github.com/threepointone/redux-react-local/blob/master/example/mousetrack.js) for usage.
+
+(A previous version of this had a saga definition directly in the @local annotation, but this method gives finer control of the input to the saga, and decouples it from the library. I plan on releasing this as a separate module soon.)
+
+
+extra - optimistic updates
 ---
 
 [pending docs](https://github.com/threepointone/redux-react-local/issues/5)
 
-
-`setState` as an action
----
-
-[pending docs](https://twitter.com/threepointone/status/698135547907190784)
 
 
 footnotes

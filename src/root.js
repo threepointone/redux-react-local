@@ -13,8 +13,10 @@ import {Optimist} from './optimist';
 // redux-react-local
 import localReducer from './reducer';
 
-// disto
+// fsa
 import ensureFSA from './ensure-fsa';
+
+// perf
 import {batchedSubscribe} from 'redux-batched-subscribe';
 import {unstable_batchedUpdates as batchedUpdates} from 'react-dom';
 
