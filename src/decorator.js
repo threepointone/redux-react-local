@@ -5,7 +5,6 @@ export default function local({
   ident, // string / ƒ(props)
   initial = {}, // object / ƒ(props)
   reducer = x => x, // ƒ(state, action) => state
-  saga, // ƒ*(getState, {$, ident, getState})
   persist = true // experimental - can swap out state on unmount
 } = {}){
   if (!ident){
@@ -33,10 +32,6 @@ export default function local({
     }))
     class ReduxReactLocal extends Component{
       static displayName = 'local:' + (Target.displayName || Target.name);
-      static contextTypes = {
-        sagas: PropTypes.func,
-        optimist: PropTypes.func
-      };
 
       state = {
         id: getId(this.props),
@@ -54,16 +49,6 @@ export default function local({
         });
       }
 
-      componentDidMount(){
-        if (saga){
-          this.runningSaga = this.context.sagas.run(saga, {
-            $: this.$,
-            ident: this.state.id,
-            getState: () => this.state.value,
-            setState: this._setState
-          });
-        }
-      }
 
       componentWillReceiveProps(next){
         let id = getId(next);
@@ -101,8 +86,6 @@ export default function local({
         this.props.dispatch(this.$({type: 'setState', payload: state}));
       };
 
-
-
       render(){
         return React.createElement(Target, {
           ...this.props,
@@ -122,10 +105,6 @@ export default function local({
             persist
           }
         });
-        if (this.runningSaga){
-          this.runningSaga.cancel();
-          delete this.runningSaga;
-        }
       }
     }
 

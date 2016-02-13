@@ -2,7 +2,6 @@ const identity = x => x;
 
 const has = {}.hasOwnProperty;
 
-
 function omit(obj, key) {
   if (!obj[key]::has(key)){
     return obj;

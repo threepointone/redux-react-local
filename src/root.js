@@ -1,50 +1,65 @@
 import React, {Component, PropTypes} from 'react';
 
-import { Provider } from 'react-redux';
+// redux
+import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
+import {Provider} from 'react-redux';
+
+// redux-saga
 import createSagaMiddleware from 'redux-saga';
-import optimist from 'redux-optimist';
-import {Optimist} from './optimist';
 import {Sagas} from './sagas';
 
-import reducer from './reducer';
+// optimist
+import optimist from 'redux-optimist';
+import {Optimist} from './optimist';
 
+// redux-react-local
+import localReducer from './reducer';
+
+// disto
 import ensureFSA from './ensure-fsa';
+import {batchedSubscribe} from 'redux-batched-subscribe';
+import {unstable_batchedUpdates as batchedUpdates} from 'react-dom';
 
-import { batchedSubscribe } from 'redux-batched-subscribe';
-import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-
-import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
 
 export default class Root extends Component{
+  // optionally accept middleware/reducers to add on to the redux store
   static propTypes = {
     middleware: PropTypes.array,
     reducers: PropTypes.object
   };
+
   createStore(){
-    return createStore(optimist(combineReducers({
-    // reducers
-    ...this.props.reducers || {},
-    local: reducer
-    })), {
+    // create a redux store
+    return createStore(
+      // reducer
+      optimist(combineReducers({
+        ...this.props.reducers || {},
+        local: localReducer
+      })),
       // initial state
-    }, compose(applyMiddleware(
+      this.props.initial || {},
       // middleware
-      ...this.props.middleware || [],
-      this.sagas,
-      ensureFSA // todo - only for development
-    ), batchedSubscribe(batchedUpdates)));
-  }
-  createSagaMiddleware(){
-    return createSagaMiddleware();
+      compose(applyMiddleware(...this.middle()), batchedSubscribe(batchedUpdates))
+    );
   }
 
-  sagas = this.createSagaMiddleware();
+  *middle(){
+    if (this.props.middleware){
+      yield* this.props.middleware;
+    }
+    yield this.sagaMiddleware;
+    if (process.env.NODE_ENV === 'development'){
+      yield ensureFSA;
+    }
+  }
+
+  sagaMiddleware = createSagaMiddleware();
+
   store = this.createStore();
-
 
   render(){
     return <Provider store={this.store}>
-      <Sagas middleware={this.sagas}>
+      <Sagas middleware={this.sagaMiddleware}>
         <Optimist>
           {this.props.children}
         </Optimist>

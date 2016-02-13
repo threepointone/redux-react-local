@@ -25,6 +25,8 @@ import {render, unmountComponentAtNode} from 'react-dom';
 import {connect} from 'react-redux';
 import {put, cps, SagaCancellationException} from 'redux-saga';
 
+import {Saga} from '../src/sagas';
+
 import {Root, local} from '../src';
 
 import expect from 'expect';
@@ -275,17 +277,15 @@ describe('redux-react-local', () => {
   // sagas
   it('accepts a saga', done => {
     let started = false;
-    @local({
-      ident: 'app',
+
+    class App extends Component{
       *saga(){
         started = true;
         yield cps(sleep, 300);
         done();
       }
-    })
-    class App extends Component{
       render(){
-        return null;
+        return <Saga saga={this.saga}/>;
       }
     }
     expect(started).toEqual(false);
@@ -300,8 +300,8 @@ describe('redux-react-local', () => {
 
   it('gets cancelled when the component unmounts', done => {
     let unmounted = false;
-    @local({
-      ident: 'app',
+
+    class App extends Component{
       *saga(){
         try {
           while (true){
@@ -314,10 +314,8 @@ describe('redux-react-local', () => {
           }
         }
       }
-    })
-    class App extends Component{
       render(){
-        return null;
+        return <Saga saga={this.saga} />;
       }
     }
 
@@ -334,15 +332,15 @@ describe('redux-react-local', () => {
   it('receives the ident', done => {
 
     @local({
-      ident: 'app',
+      ident: 'app'
+    })
+    class App extends Component{
       *saga(_, {ident}){
         expect(ident).toEqual('app');
         done();
       }
-    })
-    class App extends Component{
       render(){
-        return null;
+        return <Saga saga={this.saga} ident={this.props.ident} />;
       }
     }
     render(<Root><App /></Root>, node);
@@ -361,18 +359,20 @@ describe('redux-react-local', () => {
           return state * payload.x;
         }
         return state;
-
-      },
+      }
+    })
+    class App extends Component{
       *saga(_, {$}){
         yield put($({type: 'localE', payload: {x: 1}}));
         yield put({type: 'globalE', payload: {x: 10}});
         expect(node.innerText).toEqual('20');
         done();
       }
-    })
-    class App extends Component{
       render(){
-        return <div>{this.props.state}</div>;
+        return <div>
+          <Saga saga={this.saga} $={this.props.$}/>
+          {this.props.state}
+        </div>;
       }
     }
 
@@ -380,30 +380,35 @@ describe('redux-react-local', () => {
 
   });
 
-  it('can read from global/local redux state', done => {
-    @local({
-      ident: 'app',
-      initial: 0,
-      reducer(state, {me, meta}){
-        if (me && meta.type === 'increment'){
-          return state + 1;
-        }
-        return state;
-      },
-      *saga(getState, loco){
-        yield put(loco.$({type: 'increment'}));
-        yield put(loco.$({type: 'increment'}));
-        expect(loco.getState()).toEqual(2);
-        expect(getState().local.app).toEqual(2);
+  it('can receive props', done => {
+    class App extends Component{
+      *saga(_, {x}){
+        expect(x).toEqual(123);
         done();
       }
-    })
-    class App extends Component{
       render(){
-        return null;
+        return <Saga saga={this.saga} x={123} />;
       }
     }
-    render(<Root><App /></Root>, node);
+
+    render(<Root><App/></Root>, node);
+  });
+
+  it('can read from global redux state', done => {
+
+    class App extends Component{
+      *saga(getState){
+        expect(getState().x.a).toEqual(123);
+        done();
+      }
+      render(){
+        return <Saga saga={this.saga} />;
+      }
+    }
+
+    render(<Root reducers={{x: (state = {a: 123}) => state}}>
+      <App/>
+    </Root>, node);
 
   });
 

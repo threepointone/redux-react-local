@@ -2,9 +2,9 @@ import {PropTypes, Component, Children} from 'react';
 import {BEGIN, COMMIT, REVERT} from 'redux-optimist';
 
 export class Optimist extends Component{
-  nextTransactionID = 0;
+  transactionID = 0;
   optimist = name => {
-    const id = this.nextTransactionID++;
+    const id = this.transactionID++;
     return {
       begin: action => ({
         type: name,
@@ -29,7 +29,7 @@ export class Optimist extends Component{
   getChildContext(){
     return {
       optimist: this.optimist
-    }
+    };
   }
   render(){
     return Children.only(this.props.children);
