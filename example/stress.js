@@ -1,7 +1,7 @@
 import React, {PropTypes, Component} from 'react';
 import {render} from 'react-dom';
 import {Root, local} from '../src';
-import {cps, put} from 'redux-saga';
+import {cps, put, call} from 'redux-saga';
 import {Saga} from '../src/sagas';
 
 import styles from './stress.css';
@@ -32,12 +32,11 @@ class Cell extends Component{
   *saga(_, {period, setState}){
     while (true){
       yield cps(sleep, period);
-      setState(Math.random() * 100);
+      yield call(setState, Math.random());
     }
   }
   render(){
-    let brightness = this.props.state;
-    return <div className={styles.cell} style={{backgroundColor: ltoRgb(brightness)}} >
+    return <div className={styles.cell} style={{opacity: this.props.state}} >
       <Saga saga={this.saga} period={this.props.period} setState={this.props.setState}/>
     </div>;
   }
@@ -54,7 +53,7 @@ function times(n, fn){
 class App extends Component {
   render() {
     return <div onClick={this.onClick}>
-      {times(500, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
+      {times(400, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
     </div>;
   }
 }
