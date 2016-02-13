@@ -1,4 +1,4 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
 export default function local({
@@ -27,7 +27,7 @@ export default function local({
       return initial(props);
     }
 
-    @connect((state, props) => ({
+    return @connect((state, props) => ({
       local: state.local[getId(props)]
     }))
     class ReduxReactLocal extends Component{
@@ -48,7 +48,6 @@ export default function local({
           }
         });
       }
-
 
       componentWillReceiveProps(next){
         let id = getId(next);
@@ -105,9 +104,7 @@ export default function local({
           }
         });
       }
-    }
-
-    return ReduxReactLocal;
+    };
   };
 }
 

@@ -11,15 +11,17 @@ function omit(obj, key) {
   }, {});
 }
 
-
 export default function localReducer(state = {registered: {}}, action){
   let {payload, type, meta} = action;
+
   // this is the test sequence -
   // - setState
-  // - local.register
-  // - local.swap
-  // - then reduce on all local keys
-  // - local.unmount
+  // - local.*
+  // -  .register
+  // -  .swap
+  // -  .unmount
+  // - else, reduce on all local keys
+
   if (meta && meta.local && meta.type === 'setState'){
     // shortcircuit
     return {
