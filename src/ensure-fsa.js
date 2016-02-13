@@ -23,7 +23,7 @@ export function isFSA(action) {
 export default function ensureFSAMiddleware () {
   return next => action => {
     if (!isFSA(action)) {
-      console.log(action); // eslint-disable-line
+      console.error(action); // eslint-disable-line
       throw new Error('Flux Standard Action Violation: Actions must only have type, payload, error, optimist, or meta properties.');
     }
 

@@ -32,6 +32,10 @@ describe('redux-react-local', () => {
     render(<Root><App/></Root>, node);
   });
 
+  it('local.register');
+  it('local.swap');
+  it('local.unmount');
+
   it('ident can use props', () => {
     @local({
       ident: props => `comp:${props.abc}`
@@ -191,6 +195,7 @@ describe('redux-react-local', () => {
         return <span>{this.props.state}</span>;
       }
     }
+
     let App1 = local({
       ident: 'one',
       initial: 10,

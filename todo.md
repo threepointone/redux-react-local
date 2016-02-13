@@ -6,3 +6,4 @@
 - a better way to integrate with existing redux apps
 - angular et al
 - delete local state key when !persist
+- how is a saga affected when props change?

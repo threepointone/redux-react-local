@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 
 export default function local({
   ident, // string / ƒ(props)
-  initial = {}, // object / ƒ(props)
+  initial = {}, // value / ƒ(props)
   reducer = x => x, // ƒ(state, action) => state
   persist = true // experimental - can swap out state on unmount
 } = {}){
@@ -43,8 +43,9 @@ export default function local({
           type: 'local.register',
           payload: {
             ident: this.state.id,
+            initial: this.state.value,
             reducer,
-            initial: this.state.value
+            persist
           }
         });
       }
@@ -58,10 +59,11 @@ export default function local({
             payload: {
               ident: this.state.id,
               next: id,
-              initial: getInitial(next)
+              initial: getInitial(next),
+              reducer,
+              persist
             }
           });
-
         }
         this.setState({ id, value: next.local });
       }

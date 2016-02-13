@@ -1,26 +1,13 @@
-const identity = x => x;
+// this is the test sequence -
+// - setState
+// - local.*
+// -  .register
+// -  .swap
+// -  .unmount
+// - else, reduce on all local keys
 
-const has = {}.hasOwnProperty;
-
-function omit(obj, key) {
-  if (!obj[key]::has(key)){
-    return obj;
-  }
-  return Object.keys(obj).reduce( (o, k) => {
-    return k === key ? o : (o[k] = obj[k], o);
-  }, {});
-}
-
-export default function localReducer(state = {registered: {}}, action){
+export default function localReducer(state = {$$fns: {}}, action){
   let {payload, type, meta} = action;
-
-  // this is the test sequence -
-  // - setState
-  // - local.*
-  // -  .register
-  // -  .swap
-  // -  .unmount
-  // - else, reduce on all local keys
 
   if (meta && meta.local && meta.type === 'setState'){
     // shortcircuit
@@ -31,65 +18,103 @@ export default function localReducer(state = {registered: {}}, action){
   }
 
   if (type === 'local.register'){
-    if (state.registered[payload.ident] && state.registered[payload.ident].reducer !== identity){
-      // todo - throw, but not when hot reloading
-      console.warn(`${payload.ident} already exists`);
-    }
-    if (payload.ident === 'registered'){
-      throw new Error('cannot have an ident named `registered`, sorry!');
-    }
-    return {
-        ...state,
-        [payload.ident] : state[payload.ident] !== undefined ? state[payload.ident] : payload.initial,
-        // this way we can 'persist' across unmounts
-        // also makes preloading data simple
-        registered : {
-          ...state.registered,
-          [payload.ident]: {
-            reducer: payload.reducer
-          }
-        }
-      };
+    return register(state, action);
   }
 
   if (type === 'local.swap'){
-    // ???
-    return state;
+    // when the ident changes
+    // we're conceptually doing an unmount followed by a register
+    return register(
+      unmount(state, action), {
+        ...action,
+        payload: {
+          ...payload,
+          ident: payload.next
+        }
+      }
+    );
   }
 
   if (type === 'local.unmount'){
-    if (payload.persist){
-      return {
-        ...state,
-        registered: {
-          ...state.registered,
-          [payload.ident]: {reducer: identity}
-        }
-      };
-    }
-    else {
-      return {
-        ...omit(state, payload.ident),
-        registered: omit(state.registered, payload.ident)
-      };
-    }
+    return unmount(state, action);
   }
 
-  // update all local keys
-  let ret = {registered: state.registered}, changed = false;
-  Object.keys(state.registered).forEach(key => {
-    let a = action;
+  return reduceAll(state, action);
+}
 
+const identity = x => x;
+
+const has = {}.hasOwnProperty;
+
+function omit(obj, key) {
+  if (!obj::has(key)){
+    return obj;
+  }
+  return Object.keys(obj).reduce((o, k) => {
+    return k === key ? o : (o[k] = obj[k], o);
+  }, {});
+}
+
+function register(state, action){
+  let {payload: {ident, initial, reducer}} = action,
+    fn = state.$$fns[ident];
+
+  if (ident === '$$fns'){
+    throw new Error('cannot have an ident named `$$fns`, sorry!');
+  }
+
+  if (fn && fn !== identity){
+    // todo - throw, but not when hot reloading
+    console.warn(`${ident} already exists, swapping anyway`);
+  }
+
+  return {
+    ...state,
+    [ident] : state[ident] !== undefined ? state[ident] : initial,
+    // this way we can 'persist' across unmounts
+    // also makes preloading data simple
+    $$fns : {
+      ...state.$$fns,
+      [ident]: reducer
+    }
+  };
+}
+
+function unmount(state, action){
+  let {payload: {persist, ident}} = action;
+  if (persist){
+    return {
+      ...state,
+      $$fns: {
+        ...state.$$fns,
+        [ident]: identity
+      }
+    };
+  }
+  else {
+    return {
+      ...omit(state, ident),
+      $$fns: omit(state.$$fns, ident)
+    };
+  }
+}
+
+function reduceAll(state, action){
+  // update all local keys
+  let {meta} = action,
+    {$$fns} = state,
+    o = {$$fns},
+    changed = false;
+
+  Object.keys($$fns).forEach(key => {
+    let $action = action;
     // if this originated from the same key, then add me: true
     if (meta && meta.local && key === meta.ident){
-      a = {
-        ...a,
-        me: true
-      };
+      $action = { ...$action, me: true };
     }
 
     // reduce
-    let computed = state.registered[key].reducer(state[key], a);
+    let computed = $$fns[key](state[key], $action);
     if (computed === undefined){
       console.warn(`did you forget to return state from the ${key} reducer?`);
     }
@@ -97,14 +122,14 @@ export default function localReducer(state = {registered: {}}, action){
     if (computed !== state[key]){
       changed = true;
     }
-    ret[key] = computed;
+    o[key] = computed;
   });
 
 
-  if (changed) {
+  if (!changed) {
     // prevent rerenders if nothing's changed
-    return ret;
+    return state;
   }
 
-  return state;
+  return o;
 }
