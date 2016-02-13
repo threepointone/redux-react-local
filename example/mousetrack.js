@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {local, Root} from '../src';
 import {take, race, put, cps} from 'redux-saga';
-
+import {Saga} from '../src/sagas';
 
 // Event iterator
 function events(target, event) {
@@ -35,7 +35,9 @@ function events(target, event) {
       }
     }
     return state;
-  },
+  }
+})
+class App extends Component{
   *saga(_, {$}){
     while (true){
       yield take('app:mousedown');
@@ -63,9 +65,8 @@ function events(target, event) {
       up$.dispose();
       move$.dispose();
     }
+
   }
-})
-class App extends Component{
   onMouseDown = e => {
     let {$, dispatch} = this.props;
     dispatch($({type: 'mousedown', payload: e}));
@@ -73,6 +74,7 @@ class App extends Component{
   render(){
     let {active, x, y} = this.props.state;
     return <div onMouseDown={this.onMouseDown}>
+      <Saga saga={this.saga} $={this.props.$}/>
       <span>{active ? `${x}:${y}` : 'click and drag'}</span>
     </div>;
   }
