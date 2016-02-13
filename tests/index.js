@@ -412,22 +412,23 @@ describe('redux-react-local', () => {
     @local({
       ident: 'app',
       initial: {x: 0, y: 0, z: 0},
-      reducer(state, {me, meta, payload} = {}){
-
-        if (me){
-          switch (meta.type){
-            case 'act': return {...state, x: 1, y: 2, w: payload.w};
-            case 'act:commit': return {...state, x: 2, z: 3, w: payload.w};
-            case 'act:revert': return {...state, y: 5, z: 9, w: payload.w};
-          }
+      reducer(state, {type, payload} = {}){
+        switch (type){
+          case 'act': return {...state, x: 1, y: 2, w: payload.w};
+          case 'act:commit': return {...state, x: 2, z: 3, w: payload.w};
+          case 'act:revert': return {...state, y: 5, z: 9, w: payload.w};
         }
         return state;
       }
     })
+
     class App extends Component{
+      static contextTypes = {
+        optimist: PropTypes.func
+      };
       componentDidMount(){
-        let {dispatch, $opt, $} = this.props;
-        let o = $opt('act');
+        let {dispatch} = this.props;
+        let o = this.context.optimist('act');
 
         dispatch(o.begin({payload: {w: 1}}));
         // dispatch(o.commit({w: 5}));

@@ -58,7 +58,6 @@ export default function local({
         if (saga){
           this.runningSaga = this.context.sagas.run(saga, {
             $: this.$,
-            $opt: this.$opt,
             ident: this.state.id,
             getState: () => this.state.value,
             setState: this._setState
@@ -102,15 +101,7 @@ export default function local({
         this.props.dispatch(this.$({type: 'setState', payload: state}));
       };
 
-      $opt = name => {
-        let o = this.context.optimist(name);
 
-        return {
-          begin: x => this.$(o.begin(x)),
-          commit: x => this.$(o.commit(x)),
-          revert: x => this.$(o.revert(x))
-        };
-      };
 
       render(){
         return React.createElement(Target, {
@@ -119,7 +110,6 @@ export default function local({
           ident: this.state.id,
           dispatch: this.props.dispatch,
           state: this.state.value,
-          $opt: this.$opt,
           setState: this._setState
         }, this.props.children);
       }
