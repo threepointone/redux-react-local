@@ -218,13 +218,15 @@ Similar to the above, what I really want is -
 - friendly with the above reducing system
 
 tada, redux-react-local already does this! Just declare a <Saga/> in your react tree somewhere. It looks like this -
-```jsx`
+```jsx
 let run = function*(getState, props){
   // ...
 }
 
 // ...
-<Saga saga={run} {...props} />
+<Saga saga={run} {...props}/>
+
+// you cold also pass it children
 ```
 
 This saga 'lives' while it's in the tree, and gets cancelled when it unmounts.

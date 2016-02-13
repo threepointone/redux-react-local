@@ -35,9 +35,6 @@ class Cell extends Component{
       yield put(setState({period: period, brightness: Math.random() * 100}));
     }
   }
-  _local = () => {
-    return this.props.local;
-  };
   render(){
     let {brightness} = this.props.state;
     return <div className={styles.cell} style={{backgroundColor: ltoRgb(brightness)}} >
