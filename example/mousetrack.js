@@ -45,16 +45,16 @@ function events(target, event) {
       let move$ = events(window, 'mousemove');
 
       while (true){
-        let {move} = yield race({
+        let {up, move} = yield race({
           up: cps(up$.next),
           move: cps(move$.next)
         });
 
         if (move){
-          yield put($('mousemove', move));
+          yield put($({type: 'mousemove', payload: move}));
         }
         else {
-          yield put($('mouseup'));
+          yield put($({type: 'mouseup', payload: up}));
           break;
         }
       }
@@ -68,7 +68,7 @@ function events(target, event) {
 class App extends Component{
   onMouseDown = e => {
     let {$, dispatch} = this.props;
-    dispatch($('mousedown', e));
+    dispatch($({type: 'mousedown', payload: e}));
   };
   render(){
     let {active, x, y} = this.props.state;

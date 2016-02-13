@@ -26,11 +26,11 @@ function ltoRgb(l){
     period: Math.random() * 12000,
     brightness: Math.random() * 100
   }),
-  *saga(_, {getState, $}){
+  *saga(_, {getState, setState}){
     while (true){
       let {period} = getState();
       yield cps(sleep, period);
-      yield put($('setState', {period: period, brightness: Math.random() * 100}));
+      yield put(setState({period: period, brightness: Math.random() * 100}));
     }
   }
 })

@@ -17,7 +17,7 @@ import {local, Root} from '../src';
 class App extends Component{
   onClick = () => {
     let {$, dispatch} = this.props;
-    dispatch($('increment'));
+    dispatch($({type: 'increment'}));
   };
   render(){
     return <div onClick={this.onClick}>

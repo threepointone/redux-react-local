@@ -186,7 +186,7 @@ describe('redux-react-local', () => {
     class App extends Component{
       componentDidMount(){
         let {$} = this.props;
-        expect($('name', {some: 'payload'})).toEqual({
+        expect($({type: 'name', payload: {some: 'payload'}})).toEqual({
           type: 'app:name',
           payload: {some: 'payload'},
           meta: {
@@ -209,7 +209,7 @@ describe('redux-react-local', () => {
   it('local actions can be detected', () => {
     class App extends Component{
       componentDidMount(){
-        this.props.dispatch(this.props.$('beep', 10));
+        this.props.dispatch(this.props.$({type: 'beep', payload: 10}));
       }
       render(){
         return <span>{this.props.state}</span>;
@@ -364,7 +364,7 @@ describe('redux-react-local', () => {
 
       },
       *saga(_, {$}){
-        yield put($('localE', {x: 1}));
+        yield put($({type: 'localE', payload: {x: 1}}));
         yield put({type: 'globalE', payload: {x: 10}});
         expect(node.innerText).toEqual('20');
         done();
@@ -391,8 +391,8 @@ describe('redux-react-local', () => {
         return state;
       },
       *saga(getState, loco){
-        yield put(loco.$('increment'));
-        yield put(loco.$('increment'));
+        yield put(loco.$({type: 'increment'}));
+        yield put(loco.$({type: 'increment'}));
         expect(loco.getState()).toEqual(2);
         expect(getState().local.app).toEqual(2);
         done();
@@ -413,11 +413,12 @@ describe('redux-react-local', () => {
       ident: 'app',
       initial: {x: 0, y: 0, z: 0},
       reducer(state, {me, meta, payload} = {}){
+
         if (me){
           switch (meta.type){
             case 'act': return {...state, x: 1, y: 2, w: payload.w};
-            case 'act:done': return {...state, x: 2, z: 3, w: payload.w};
-            case 'act:fail': return {...state, y: 5, z: 9, w: payload.w};
+            case 'act:commit': return {...state, x: 2, z: 3, w: payload.w};
+            case 'act:revert': return {...state, y: 5, z: 9, w: payload.w};
           }
         }
         return state;
@@ -425,12 +426,12 @@ describe('redux-react-local', () => {
     })
     class App extends Component{
       componentDidMount(){
-        let {dispatch, $opt} = this.props;
+        let {dispatch, $opt, $} = this.props;
         let o = $opt('act');
 
-        dispatch(o.begin({w: 1}));
+        dispatch(o.begin({payload: {w: 1}}));
         // dispatch(o.commit({w: 5}));
-        dispatch(o.revert({w: 5}));
+        dispatch(o.revert({payload: {w: 5}}));
       }
       render(){
         return <div>{JSON.stringify(this.props.state)}</div>;
