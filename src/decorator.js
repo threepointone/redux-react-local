@@ -74,7 +74,6 @@ export default function local({
           type: `${this.state.id}:${action.type}`,
           meta: {
             ...action.meta || {},
-            // this is just to be faster when reducing
             ident: this.state.id,
             type: action.type,
             local: true

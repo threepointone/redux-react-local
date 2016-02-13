@@ -44,10 +44,4 @@ export class Saga extends Component{
 }
 
 
-// {
-//       $: this.$,
-//       ident: this.state.id,
-//       getState: () => this.state.value,
-//       setState: this._setState
-//     }
 

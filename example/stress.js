@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {PropTypes, Component} from 'react';
 import {render} from 'react-dom';
 import {Root, local} from '../src';
 import {cps, put} from 'redux-saga';
@@ -23,22 +23,22 @@ function ltoRgb(l){
 
 @local({
   ident: ({id}) => `cell:${id}`,
-  initial: () => ({
-    period: Math.random() * 12000,
-    brightness: Math.random() * 100
-  })
+  initial: () => Math.random() * 100
 })
 class Cell extends Component{
+  static propTypes = {
+    period: PropTypes.number.isRequired
+  };
   *saga(_, {period, setState}){
     while (true){
       yield cps(sleep, period);
-      yield put(setState({period: period, brightness: Math.random() * 100}));
+      setState(Math.random() * 100);
     }
   }
   render(){
-    let {brightness} = this.props.state;
+    let brightness = this.props.state;
     return <div className={styles.cell} style={{backgroundColor: ltoRgb(brightness)}} >
-      <Saga saga={this.saga} period={this.props.state.period} setState={this.props.setState} />
+      <Saga saga={this.saga} period={this.props.period} setState={this.props.setState}/>
     </div>;
   }
 }
@@ -54,7 +54,7 @@ function times(n, fn){
 class App extends Component {
   render() {
     return <div onClick={this.onClick}>
-      {times(500, i => <Cell id={i} key={i} />)}
+      {times(500, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
     </div>;
   }
 }

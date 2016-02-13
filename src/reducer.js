@@ -36,7 +36,7 @@ export default function localReducer(state = {registered: {}}, action){
     if (payload.ident === 'registered'){
       throw new Error('cannot have an ident named `registered`, sorry!');
     }
-    state = {
+    return {
         ...state,
         [payload.ident] : state[payload.ident] !== undefined ? state[payload.ident] : payload.initial,
         // this way we can 'persist' across unmounts
@@ -53,6 +53,24 @@ export default function localReducer(state = {registered: {}}, action){
   if (type === 'local.swap'){
     // ???
     return state;
+  }
+
+  if (type === 'local.unmount'){
+    if (payload.persist){
+      return {
+        ...state,
+        registered: {
+          ...state.registered,
+          [payload.ident]: {reducer: identity}
+        }
+      };
+    }
+    else {
+      return {
+        ...omit(state, payload.ident),
+        registered: omit(state.registered, payload.ident)
+      };
+    }
   }
 
   // update all local keys
@@ -83,25 +101,7 @@ export default function localReducer(state = {registered: {}}, action){
 
   if (changed) {
     // prevent rerenders if nothing's changed
-    state = ret;
-  }
-
-  if (type === 'local.unmount'){
-    if (payload.persist){
-      state = {
-        ...state,
-        registered: {
-          ...state.registered,
-          [payload.ident]: {reducer: identity}
-        }
-      };
-    }
-    else {
-      state = {
-        ...omit(state, payload.ident),
-        registered: omit(state.registered, payload.ident)
-      };
-    }
+    return ret;
   }
 
   return state;
