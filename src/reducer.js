@@ -1,47 +1,3 @@
-// this is the test sequence -
-// - setState
-// - local.*
-// -  .register
-// -  .swap
-// -  .unmount
-// - else, reduce on all local keys
-
-export default function localReducer(state = {$$fns: {}}, action){
-  let {payload, type, meta} = action;
-
-  if (meta && meta.local && meta.type === 'setState'){
-    // shortcircuit
-    return {
-      ...state,
-      [meta.ident]: payload
-    };
-  }
-
-  if (type === 'local.register'){
-    return register(state, action);
-  }
-
-  if (type === 'local.swap'){
-    // when the ident changes
-    // we're conceptually doing an unmount followed by a register
-    return register(
-      unmount(state, action), {
-        ...action,
-        payload: {
-          ...payload,
-          ident: payload.next
-        }
-      }
-    );
-  }
-
-  if (type === 'local.unmount'){
-    return unmount(state, action);
-  }
-
-  return reduceAll(state, action);
-}
-
 const identity = x => x;
 
 const has = {}.hasOwnProperty;
@@ -54,6 +10,44 @@ function omit(obj, key) {
     return k === key ? o : (o[k] = obj[k], o);
   }, {});
 }
+
+// this is the test sequence -
+// - setState
+// - local.*
+// -  .register
+// -  .swap
+// -  .unmount
+// - else, reduce on all local keys
+
+export default function localReducer(state = {$$fns: {}}, action){
+  let {payload, type, meta} = action;
+
+  if (meta && meta.type === '$$setState' && meta.local){
+    // shortcircuit
+    return {
+      ...state,
+      [meta.ident]: payload
+    };
+  }
+
+  switch (type){
+    case '$$local.register': return register(state, action);
+
+    case '$$local.swap': return register(
+      unmount(state, action), {
+        ...action,
+        payload: {
+          ...payload,
+          ident: payload.next
+        }
+      });
+
+    case '$$local.unmount': return unmount(state, action);
+
+    default: return reduceAll(state, action);
+  }
+}
+
 
 function register(state, action){
   let {payload: {ident, initial, reducer}} = action,
@@ -109,7 +103,7 @@ function reduceAll(state, action){
   Object.keys($$fns).forEach(key => {
     let $action = action;
     // if this originated from the same key, then add me: true
-    if (meta && meta.local && key === meta.ident){
+    if (meta && key === meta.ident && meta.local){
       $action = { ...$action, me: true };
     }
 

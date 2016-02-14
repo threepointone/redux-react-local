@@ -40,7 +40,7 @@ export default function local({
 
       componentWillMount(){
         this.props.dispatch({
-          type: 'local.register',
+          type: '$$local.register',
           payload: {
             ident: this.state.id,
             initial: this.state.value,
@@ -55,7 +55,7 @@ export default function local({
 
         if (id !== this.state.id){
           this.props.dispatch({
-            type: 'local.swap',
+            type: '$$local.swap',
             payload: {
               ident: this.state.id,
               next: id,
@@ -83,7 +83,7 @@ export default function local({
       };
 
       _setState = state => {
-        this.props.dispatch(this.$({type: 'setState', payload: state}));
+        this.props.dispatch(this.$({type: '$$setState', payload: state}));
       };
 
       render(){
@@ -99,7 +99,7 @@ export default function local({
 
       componentWillUnmount(){
         this.props.dispatch({
-          type: 'local.unmount',
+          type: '$$local.unmount',
           payload: {
             ident: this.state.id,
             persist

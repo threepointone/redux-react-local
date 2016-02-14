@@ -1,7 +1,7 @@
 import React, {PropTypes, Component} from 'react';
 import {render} from 'react-dom';
 import {Root, local} from '../src';
-import {cps, put, call} from 'redux-saga';
+import {cps, call} from 'redux-saga';
 import {Saga} from '../src/sagas';
 
 import styles from './stress.css';
@@ -10,16 +10,6 @@ function sleep(period, done){
   setTimeout(() => done(null, true), period);
 }
 
-function toHex(n) {
-  n = n.toString(16);
-  n = n.length < 2 ? '0' + n : n;
-  return n;
-}
-
-function ltoRgb(l){
-  let v = toHex(Math.round(l * 2.55));
-  return '#' + v + v + v;
-}
 
 @local({
   ident: ({id}) => `cell:${id}`,
