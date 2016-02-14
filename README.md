@@ -59,7 +59,7 @@ decorator for a react component
 - `initial` - initial local state
 - `initial (props)` - a function that returns the above
 - `reducer (state, {type, payload, meta, me})` - a local reducer on every action on the store, `me` will be true for actions dispatched locally, and `meta.type` will not have the `${ident}:` prefix
-- `persist` - a boolean whether the state should persist in the store on unmount
+- `persist` - a boolean on whether the state should persist in the store on unmount, defaults to `true`
 
 
 passed props
