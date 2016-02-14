@@ -1,6 +1,20 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
+const has = {}.hasOwnProperty;
+
+function omit(obj, key) {
+  if (!obj::has(key)){
+    return obj;
+  }
+  return Object.keys(obj).reduce((o, k) =>
+    k === key ?
+      o :
+      (o[k] = obj[k], o),
+    {});
+}
+
+
 export default function local({
   ident, // string / ƒ(props)
   initial = {}, // value / ƒ(props)
@@ -28,7 +42,7 @@ export default function local({
   return function(Target){
 
     return @connect((state, props) => ({
-      local: state.local[getId(props)]
+      $$local: state.local[getId(props)]
     }))
     class ReduxReactLocal extends Component{
       static displayName = 'local:' + (Target.displayName || Target.name);
@@ -83,10 +97,10 @@ export default function local({
               persist
             }
           });
-          this.setState({ id, value: next.local !== undefined ? next.local : init });
+          this.setState({ id, value: next.$$local !== undefined ? next.$$local : init });
         }
         else {
-          this.setState({ value: next.local });
+          this.setState({ value: next.$$local });
         }
 
       }
@@ -102,14 +116,15 @@ export default function local({
       }
 
       render(){
-        return React.createElement(Target, {
-          ...this.props,
-          $: this.$,
-          ident: this.state.id,
-          dispatch: this.props.dispatch,
-          state: this.state.value,
-          setState: this._setState
-        }, this.props.children);
+        return <Target
+          {...omit(this.props, '$$local')}
+          $={this.$}
+          ident={this.state.id}
+          dispatch={this.props.dispatch}
+          state={this.state.value}
+          setState={this._setState}>
+          {this.props.children}
+        </Target>;
       }
     };
   };

@@ -240,14 +240,13 @@ describe('redux-react-local', () => {
     })
     class App extends Component{
       componentDidMount(){
-        let {$} = this.props;
-        expect($({type: 'name', payload: {some: 'payload'}})).toEqual({
+        expect(this.props.$({type: 'name', payload: {some: 'payload'}})).toEqual({
           type: 'app:name',
           payload: {some: 'payload'},
           meta: {
             ident: 'app',
             type: 'name',
-            local: true
+            $$l: true
           }
         });
       }
