@@ -87,7 +87,9 @@ describe('redux-react-local', () => {
                     'faux:1': 2,
                     'faux:2': 4,  // and this one incremented twice
                     'faux:3': 4,
-                    'faux:7': 8   // 6 and 8 evaporate, and 7 inited again
+
+                    // 6 and 8 evaporate, and 7 came back with fresh data
+                    'faux:7': 8
                   });
                   done();
                 }))));
