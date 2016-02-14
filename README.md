@@ -10,7 +10,7 @@ warning: the api's in a state of flux right now
 tl;dr
 
 ```jsx
-import {Root, local} from 'redux-react-local';
+import {local, reducer} from 'redux-react-local';
 
 // connect your components
 @local({
@@ -34,9 +34,19 @@ class App extends React.Component{
     </div>;
   }
 }
+```
 
-render(<Root><App/></Root>, /* ... */);
+reducer
+---
 
+Add the supplied reducer to a key `local` on your redux store.
+```jsx
+// ...
+combineReducers({
+  // your other reducers
+  local: reducer
+})
+// ...
 ```
 
 local
@@ -59,17 +69,6 @@ passed props
 - `$` - helper to locally scope an action
 - `state` - current local state
 - `setState(state)`
-
-
-Root
----
-
-- `reducers` - an object with reducers
-- `initial` - initial state of the redux store
-- `middleware` - an array of redux middleware
-
-
-Use `<Root/>` to wrap your app; this sets up the redux store and associated plumbing.
 
 
 rationale
@@ -132,11 +131,9 @@ class App extends Component{
   }
 }
 
-render(<Root><App/></Root>, window.app);
-
 ```
 
-We use a `<Root>` component to wrap the whole tree; this sets up a redux store and other plumbing. We then annotate our components with a `@local` decorator declaring -
+We annotate our components with a `@local` decorator declaring -
 
 - `ident` - short for 'identity', we use this value as a key on our internal store, among other things. This is either a string ('app', 'inbox', etc), or a function that receives this component's `props` and returns a string.
 - `initial` - initial state for this component. Can also be a function that receives `props` and returns the initial state.
@@ -239,6 +236,16 @@ extra - optimistic updates
 ---
 
 [pending docs](https://github.com/threepointone/redux-react-local/issues/5)
+
+extra - Root
+---
+
+- `reducers` - an object with reducers
+- `initial` - initial state of the redux store
+- `middleware` - an array of redux middleware
+
+
+Use `<Root/>` to wrap your app; this sets up a redux store and associated plumbing for sagas, optimistic updates, etc.
 
 
 
