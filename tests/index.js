@@ -2,13 +2,26 @@
 
 import React, {Component, PropTypes} from 'react';
 import {render, unmountComponentAtNode} from 'react-dom';
-import {connect} from 'react-redux';
 
-import {Root, local} from '../src';
+import {createStore, combineReducers} from 'redux';
+import {connect, Provider} from 'react-redux';
+
+import {local, reducer} from '../src';
 
 import expect from 'expect';
 import expectJSX from 'expect-jsx';
 expect.extend(expectJSX);
+
+class LocalRoot extends Component{
+  store = createStore(
+    combineReducers({local: reducer})
+  );
+  render(){
+    return <Provider store={this.store}>
+      {this.props.children}
+    </Provider>;
+  }
+}
 
 
 describe('redux-react-local', () => {
@@ -29,7 +42,7 @@ describe('redux-react-local', () => {
         return null;
       }
     }
-    render(<Root><App/></Root>, node);
+    render(<LocalRoot><App/></LocalRoot>, node);
   });
 
   it('local.register');
@@ -52,7 +65,7 @@ describe('redux-react-local', () => {
       }
     }
 
-    render(<Root><App abc='xyz'/></Root>, node);
+    render(<LocalRoot><App abc='xyz'/></LocalRoot>, node);
   });
 
   it('throws if you don\'t pass ident', () => {
@@ -83,7 +96,7 @@ describe('redux-react-local', () => {
       }
     }
 
-    render(<Root><App /></Root>, node);
+    render(<LocalRoot><App /></LocalRoot>, node);
     expect(node.innerText).toEqual('zzz');
   });
 
@@ -101,7 +114,7 @@ describe('redux-react-local', () => {
         return null;
       }
     }
-    render(<Root><App /></Root>, node);
+    render(<LocalRoot><App /></LocalRoot>, node);
   });
 
   it('initial state can use props', () => {
@@ -117,7 +130,7 @@ describe('redux-react-local', () => {
         return null;
       }
     }
-    render(<Root><App x={5}/></Root>, node);
+    render(<LocalRoot><App x={5}/></LocalRoot>, node);
   });
 
   it('accepts a reducer that gets called on all actions', () => {
@@ -143,7 +156,7 @@ describe('redux-react-local', () => {
         return <div>{this.props.state}</div>;
       }
     }
-    render(<Root><App /></Root>, node);
+    render(<LocalRoot><App /></LocalRoot>, node);
     expect(node.innerText).toEqual('3');
 
   });
@@ -180,7 +193,7 @@ describe('redux-react-local', () => {
         return null;
       }
     }
-    render(<Root><App /></Root>, node);
+    render(<LocalRoot><App /></LocalRoot>, node);
   });
   it('local events have meta information', () => {
     // as above
@@ -221,11 +234,11 @@ describe('redux-react-local', () => {
       }
     })(App);
 
-    render(<Root>
+    render(<LocalRoot>
       <div>
         <App1 />:<App2 />
       </div>
-    </Root>, node);
+    </LocalRoot>, node);
 
     expect(node.innerText).toEqual('20:1000');
 
@@ -248,7 +261,7 @@ describe('redux-react-local', () => {
       }
     }
 
-    render(<Root><App /></Root>, node);
+    render(<LocalRoot><App /></LocalRoot>, node);
     expect(node.innerText).toEqual('1');
 
   });

@@ -1,10 +1,14 @@
 /* global describe, it, beforeEach, afterEach */
 
 import React, {PropTypes, Component} from 'react' ;
-import {local, Root} from '../src';
 
 import {render, unmountComponentAtNode} from 'react-dom';
-// import {cps, put, SagaCancellationException} from 'redux-saga';
+
+import {createStore, combineReducers} from 'redux';
+import {connect, Provider} from 'react-redux';
+
+import {Optimist} from '../src/optimist';
+import optimist from 'redux-optimist';
 
 import expect from 'expect';
 import expectJSX from 'expect-jsx';
@@ -18,20 +22,29 @@ describe('react-redux-optimist', () => {
 
   it('optimistic updates', () => {
 
-
-    @local({
-      ident: 'app',
-      initial: {x: 0, y: 0, z: 0},
-      reducer(state, {type, payload} = {}){
-        switch (type){
-          case 'act': return {...state, x: 1, y: 2, w: payload.w};
-          case 'act:commit': return {...state, x: 2, z: 3, w: payload.w};
-          case 'act:revert': return {...state, y: 5, z: 9, w: payload.w};
-        }
-        return state;
+    class LocalRoot extends Component{
+      store = createStore(
+        optimist(combineReducers({
+          app(state = {x: 0, y: 0, z: 0}, {type, payload} = {}){
+            switch (type){
+              case 'act': return {...state, x: 1, y: 2, w: payload.w};
+              case 'act:commit': return {...state, x: 2, z: 3, w: payload.w};
+              case 'act:revert': return {...state, y: 5, z: 9, w: payload.w};
+            }
+            return state;
+          }
+        }))
+      );
+      render(){
+        return <Provider store={this.store}>
+          <Optimist>
+            {this.props.children}
+          </Optimist>
+        </Provider>;
       }
-    })
+    }
 
+    @connect(state => state)
     class App extends Component{
       static contextTypes = {
         optimist: PropTypes.func
@@ -45,10 +58,10 @@ describe('react-redux-optimist', () => {
         dispatch(o.revert({payload: {w: 5}}));
       }
       render(){
-        return <div>{JSON.stringify(this.props.state)}</div>;
+        return <div>{JSON.stringify(this.props.app)}</div>;
       }
     }
-    render(<Root><App /></Root>, node);
+    render(<LocalRoot><App /></LocalRoot>, node);
 
     expect(node.innerText).toEqual(JSON.stringify({
       x: 0, y: 5, z: 9, w: 5

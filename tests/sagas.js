@@ -18,7 +18,7 @@ function sleep(period, done){
 class SagaRoot extends Component{
   sagaMiddleware = createSagaMiddleware();
   store = createStore(
-    combineReducers(this.props.reducers || {}),
+    combineReducers(this.props.reducers || {x: (x = {}) => x}),
     applyMiddleware(this.sagaMiddleware)
   );
   render(){
