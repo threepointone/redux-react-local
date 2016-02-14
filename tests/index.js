@@ -23,7 +23,6 @@ class LocalRoot extends Component{
   }
 }
 
-
 describe('redux-react-local', () => {
   let node;
   beforeEach(() => node = document.createElement('div'));
@@ -45,8 +44,69 @@ describe('redux-react-local', () => {
     render(<LocalRoot><App/></LocalRoot>, node);
   });
 
-  it('local.register');
-  it('local.swap');
+  it('local.register', () => {
+    // as below
+  });
+
+  it('should be able to persist and swap between stores', done => {
+
+    let opts = {
+      ident: props => `faux:${props.faux}`,
+      initial: props => props.faux
+    };
+
+    class Inner extends Component{
+      componentWillMount(){
+        this.props.setState(this.props.state + 1);
+      }
+      componentWillReceiveProps(next){
+        if (next.ident !== this.props.ident){
+          next.setState(next.state + 1);
+        }
+      }
+      render(){
+        return null;
+      }
+    }
+
+    let Inner1 = local(opts)(Inner);
+    let Inner2 = local({...opts, persist: false})(Inner);
+
+
+    @connect(state => state)
+    class App extends Component{
+      state = {faux: 1};
+      componentDidMount(){
+        setTimeout(() => {
+          this.setState({faux: 1}, () =>
+            this.setState({faux: 2}, () =>
+              this.setState({faux: 3}, () =>
+                this.setState({faux: 2}, () => {
+                  expect(omit(this.props.local, '$$fns')).toEqual({
+                    // these 3 persisted
+                    'faux:1': 2,
+                    'faux:2': 4,  // and this one incremented twice
+                    'faux:3': 4,
+                    'faux:7': 8   // 6 and 8 evaporate, and 7 inited again
+                  });
+                  done();
+                }))));
+
+        }, 200);
+
+      }
+      render(){
+        return <div>
+          <Inner1 faux={this.state.faux} key='one'/>
+          <Inner2 faux={this.state.faux + 5} key='two'/>
+        </div>;
+
+      }
+    }
+
+    render(<LocalRoot><App/></LocalRoot>, node);
+  });
+
   it('local.unmount');
 
   it('ident can use props', () => {
@@ -269,3 +329,15 @@ describe('redux-react-local', () => {
 
 });
 
+const has = {}.hasOwnProperty;
+
+function omit(obj, key) {
+  if (!obj::has(key)){
+    return obj;
+  }
+  return Object.keys(obj).reduce((o, k) =>
+    k === key ?
+      o :
+      (o[k] = obj[k], o),
+    {});
+}

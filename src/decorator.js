@@ -72,18 +72,23 @@ export default function local({
         let id = getId(next);
 
         if (id !== this.state.id){
+          let init = getInitial(next);
           this.props.dispatch({
             type: '$$local.swap',
             payload: {
               ident: this.state.id,
               next: id,
-              initial: getInitial(next),
+              initial: init,
               reducer,
               persist
             }
           });
+          this.setState({ id, value: next.local !== undefined ? next.local : init });
         }
-        this.setState({ id, value: next.local });
+        else {
+          this.setState({ value: next.local });
+        }
+
       }
 
       componentWillUnmount(){

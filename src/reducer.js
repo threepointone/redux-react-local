@@ -83,7 +83,7 @@ function unmount(state, action){
       ...state,
       $$fns: {
         ...state.$$fns,
-        [ident]: identity
+        [ident]: identity // we use this as a signal that it's been unmounted
       }
     };
   }
