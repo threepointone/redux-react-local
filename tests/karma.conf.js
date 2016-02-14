@@ -3,6 +3,7 @@ module.exports = function(config){
     browsers: ['Chrome'],
     files: ['../node_modules/babel-polyfill/dist/polyfill.js',
       './index.js',
+      './root.js',
       './optimist.js',
       './sagas.js'
     ],
