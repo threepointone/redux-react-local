@@ -15,4 +15,8 @@ expect.extend(expectJSX);
 
 describe('disto', () => {
   it('lives');
+
+  it('accepts reducers');
+  it('accepts middleware');
+  it('accepts an initial state');
 });
