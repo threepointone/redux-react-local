@@ -16,10 +16,10 @@ function omit(obj, key) {
 
 
 export default function local({
-  ident, // string / ƒ(props)
-  initial = {}, // value / ƒ(props)
+  ident,            // string / ƒ(props)
+  initial = {},     // value / ƒ(props)
   reducer = x => x, // ƒ(state, action) => state
-  persist = true // experimental - can swap out state on unmount
+  persist = true    // can swap out state on unmount
 } = {}){
   if (!ident){
     throw new Error('cannot annotate with @local without an ident');
@@ -123,7 +123,7 @@ export default function local({
           dispatch={this.props.dispatch}
           state={this.state.value}
           setState={this._setState}>
-          {this.props.children}
+            {this.props.children}
         </Target>;
       }
     };

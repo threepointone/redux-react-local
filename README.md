@@ -59,6 +59,7 @@ decorator for a react component
 - `initial` - initial local state
 - `initial (props)` - a function that returns the above
 - `reducer (state, {type, payload, meta, me})` - a local reducer on every action on the store, `me` will be true for actions dispatched locally, and `meta.type` will not have the `${ident}:` prefix
+- `persist` - a boolean whether the state should persist in the store on unmount
 
 
 passed props
@@ -138,7 +139,7 @@ We annotate our components with a `@local` decorator declaring -
 - `ident` - short for 'identity', we use this value as a key on our internal store, among other things. This is either a string ('app', 'inbox', etc), or a function that receives this component's `props` and returns a string.
 - `initial` - initial state for this component. Can also be a function that receives `props` and returns the initial state.
 - `reducer` - a reducer for local state; recieves all actions that flow through the redux store.
-- `persist` - (experimental) a boolean indicating whether to 'keep' the state after the component has unmounted
+- `persist` - a boolean indicating whether to 'keep' the state after the component has unmounted
 
 The wrapped component will then recieve these props -
 
