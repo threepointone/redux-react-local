@@ -10,7 +10,7 @@ warning: the api's in a state of flux right now
 tl;dr
 
 ```jsx
-import {local, reducer} from 'redux-react-local';
+import {local} from 'redux-react-local';
 
 // connect your components
 @local({
