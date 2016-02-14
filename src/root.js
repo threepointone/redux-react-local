@@ -5,9 +5,11 @@ import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
 import {Provider} from 'react-redux';
 
 // redux-saga
+import createSagaMiddleware from 'redux-saga';
 import {Sagas} from './sagas';
 
 // optimist
+import optimist from 'redux-optimist';
 import {Optimist} from './optimist';
 
 // redux-react-local
@@ -24,7 +26,7 @@ function makeStore(reducers = {}, initial = {}, middleware = []){
   // create a redux store
   return createStore(
     // reducer
-    Optimist.wrap(combineReducers({
+    optimist(combineReducers({
       ...reducers || {},
       local: localReducer
     })),
@@ -53,7 +55,7 @@ export default class Root extends Component{
     }
   }
 
-  sagaMiddleware = Sagas.createSagaMiddleware();
+  sagaMiddleware = createSagaMiddleware();
 
   store = makeStore(
     this.props.reducers,

@@ -1,9 +1,7 @@
 import {PropTypes, Component, Children} from 'react';
-import optimist, {BEGIN, COMMIT, REVERT} from 'redux-optimist';
+import {BEGIN, COMMIT, REVERT} from 'redux-optimist';
 
 export class Optimist extends Component{
-  static wrap = optimist;
-
   transactionID = 0;
 
   optimist = name => {

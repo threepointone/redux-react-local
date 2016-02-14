@@ -11,21 +11,21 @@ export default function local({
     throw new Error('cannot annotate with @local without an ident');
   }
 
+  function getId(props){
+    if (typeof ident === 'string'){
+      return ident;
+    }
+    return ident(props);
+  }
+
+  function getInitial(props){
+    if (typeof initial !== 'function'){
+      return initial;
+    }
+    return initial(props);
+  }
+
   return function(Target){
-
-    function getId(props){
-      if (typeof ident === 'string'){
-        return ident;
-      }
-      return ident(props);
-    }
-
-    function getInitial(props){
-      if (typeof initial !== 'function'){
-        return initial;
-      }
-      return initial(props);
-    }
 
     return @connect((state, props) => ({
       local: state.local[getId(props)]
@@ -36,6 +36,24 @@ export default function local({
       state = {
         id: getId(this.props),
         value: getInitial(this.props)
+      };
+
+      $ = action => {
+        // 'localize' an event. super conveninent for actions 'local' to this component
+        return  {
+          ...action,
+          type: `${this.state.id}:${action.type}`,
+          meta: {
+            ...action.meta || {},
+            ident: this.state.id,
+            type: action.type,
+            local: true
+          }
+        };
+      };
+
+      _setState = state => {
+        this.props.dispatch(this.$({type: '$$setState', payload: state}));
       };
 
       componentWillMount(){
@@ -68,23 +86,15 @@ export default function local({
         this.setState({ id, value: next.local });
       }
 
-      $ = action => {
-        // 'localize' an event. super conveninent for actions 'local' to this component
-        return  {
-          ...action,
-          type: `${this.state.id}:${action.type}`,
-          meta: {
-            ...action.meta || {},
+      componentWillUnmount(){
+        this.props.dispatch({
+          type: '$$local.unmount',
+          payload: {
             ident: this.state.id,
-            type: action.type,
-            local: true
+            persist
           }
-        };
-      };
-
-      _setState = state => {
-        this.props.dispatch(this.$({type: '$$setState', payload: state}));
-      };
+        });
+      }
 
       render(){
         return React.createElement(Target, {
@@ -95,16 +105,6 @@ export default function local({
           state: this.state.value,
           setState: this._setState
         }, this.props.children);
-      }
-
-      componentWillUnmount(){
-        this.props.dispatch({
-          type: '$$local.unmount',
-          payload: {
-            ident: this.state.id,
-            persist
-          }
-        });
       }
     };
   };

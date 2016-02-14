@@ -6,9 +6,11 @@ function omit(obj, key) {
   if (!obj::has(key)){
     return obj;
   }
-  return Object.keys(obj).reduce((o, k) => {
-    return k === key ? o : (o[k] = obj[k], o);
-  }, {});
+  return Object.keys(obj).reduce((o, k) =>
+    k === key ?
+      o :
+      (o[k] = obj[k], o),
+    {});
 }
 
 // this is the test sequence -
@@ -32,22 +34,11 @@ export default function localReducer(state = {$$fns: {}}, action){
 
   switch (type){
     case '$$local.register': return register(state, action);
-
-    case '$$local.swap': return register(
-      unmount(state, action), {
-        ...action,
-        payload: {
-          ...payload,
-          ident: payload.next
-        }
-      });
-
+    case '$$local.swap': return swap(state, action);
     case '$$local.unmount': return unmount(state, action);
-
     default: return reduceAll(state, action);
   }
 }
-
 
 function register(state, action){
   let {payload: {ident, initial, reducer}} = action,
@@ -72,6 +63,17 @@ function register(state, action){
       [ident]: reducer
     }
   };
+}
+
+function swap(state, action){
+  let {payload} = action;
+  return register(unmount(state, action), {
+    ...action,
+    payload: {
+      ...payload,
+      ident: payload.next
+    }
+  });
 }
 
 function unmount(state, action){

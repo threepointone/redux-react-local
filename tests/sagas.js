@@ -2,9 +2,10 @@
 
 import React, {Component} from 'react';
 import {Sagas, Saga} from '../src/sagas';
-import {Root, local} from '../src';
+import {createStore, applyMiddleware, combineReducers} from 'redux';
+import {Provider} from 'react-redux';
 import {render, unmountComponentAtNode} from 'react-dom';
-import {cps, put, SagaCancellationException} from 'redux-saga';
+import createSagaMiddleware, {cps, SagaCancellationException} from 'redux-saga';
 
 import expect from 'expect';
 import expectJSX from 'expect-jsx';
@@ -14,6 +15,20 @@ function sleep(period, done){
   setTimeout(() => done(null, true), period);
 }
 
+class SagaRoot extends Component{
+  sagaMiddleware = createSagaMiddleware();
+  store = createStore(
+    combineReducers(this.props.reducers || {}),
+    applyMiddleware(this.sagaMiddleware)
+  );
+  render(){
+    return <Provider store={this.store}>
+      <Sagas middleware={this.sagaMiddleware}>
+        {this.props.children}
+      </Sagas>
+    </Provider>;
+  }
+}
 
 describe('react-redux-saga', () => {
   let node;
@@ -36,7 +51,7 @@ describe('react-redux-saga', () => {
     }
     expect(started).toEqual(false);
 
-    render(<Root><App /></Root>, node);
+    render(<SagaRoot><App /></SagaRoot>, node);
     expect(started).toEqual(true);
   });
 
@@ -65,64 +80,13 @@ describe('react-redux-saga', () => {
       }
     }
 
-    render(<Root><App /></Root>, node);
+    render(<SagaRoot><App /></SagaRoot>, node);
 
     sleep(500, () => {
       unmounted = true;
       unmountComponentAtNode(node);
     });
 
-
-  });
-
-  it('receives the ident', done => {
-
-    @local({
-      ident: 'app'
-    })
-    class App extends Component{
-      *saga(_, {ident}){
-        expect(ident).toEqual('app');
-        done();
-      }
-      render(){
-        return <Saga saga={this.saga} ident={this.props.ident} />;
-      }
-    }
-    render(<Root><App /></Root>, node);
-
-  });
-
-  it('can dispatch global/local actions', done => {
-    @local({
-      ident: 'app',
-      initial: 1,
-      reducer(state, {me, type, payload, meta}){
-        if (me && meta.type === 'localE'){
-          return state + payload.x;
-        }
-        if (type === 'globalE'){
-          return state * payload.x;
-        }
-        return state;
-      }
-    })
-    class App extends Component{
-      *saga(_, {$}){
-        yield put($({type: 'localE', payload: {x: 1}}));
-        yield put({type: 'globalE', payload: {x: 10}});
-        expect(node.innerText).toEqual('20');
-        done();
-      }
-      render(){
-        return <div>
-          <Saga saga={this.saga} $={this.props.$}/>
-          {this.props.state}
-        </div>;
-      }
-    }
-
-    render(<Root><App /></Root>, node);
 
   });
 
@@ -137,7 +101,7 @@ describe('react-redux-saga', () => {
       }
     }
 
-    render(<Root><App/></Root>, node);
+    render(<SagaRoot><App/></SagaRoot>, node);
   });
 
   it('can read from global redux state', done => {
@@ -152,9 +116,9 @@ describe('react-redux-saga', () => {
       }
     }
 
-    render(<Root reducers={{x: (state = {a: 123}) => state}}>
+    render(<SagaRoot reducers={{x: (state = {a: 123}) => state}}>
       <App/>
-    </Root>, node);
+    </SagaRoot>, node);
 
   });
-  });
+});
