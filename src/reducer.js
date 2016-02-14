@@ -13,31 +13,21 @@ function omit(obj, key) {
     {});
 }
 
-// this is the test sequence -
-// - setState
-// - local.*
-// -  .register
-// -  .swap
-// -  .unmount
-// - else, reduce on all local keys
-
 export default function localReducer(state = {$$fns: {}}, action){
-  let {payload, type, meta} = action;
-
-  if (meta && meta.type === '$$setState' && meta.local){
-    // shortcircuit
-    return {
-      ...state,
-      [meta.ident]: payload
-    };
-  }
-
-  switch (type){
+  switch (action.type){
+    case '$$local.setState': return setState(state, action);
     case '$$local.register': return register(state, action);
     case '$$local.swap': return swap(state, action);
     case '$$local.unmount': return unmount(state, action);
     default: return reduceAll(state, action);
   }
+}
+
+function setState(state, {payload}){
+  return {
+    ...state,
+    [payload.ident]: payload.state
+  };
 }
 
 function register(state, action){

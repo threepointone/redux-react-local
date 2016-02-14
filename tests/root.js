@@ -19,4 +19,12 @@ describe('disto', () => {
   it('accepts reducers');
   it('accepts middleware');
   it('accepts an initial state');
+
+  it('can define sagas');
+  it('can do optimistic updates');
+  it('can do local annotations');
+
+  it('batches updates');
+  it('ensures FSA shapes');
+
 });

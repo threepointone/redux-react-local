@@ -53,7 +53,7 @@ export default function local({
       };
 
       _setState = state => {
-        this.props.dispatch(this.$({type: '$$setState', payload: state}));
+        this.props.dispatch({type: '$$local.setState', payload: {state, ident: this.state.id}});
       };
 
       componentWillMount(){
