@@ -47,7 +47,7 @@ export default function local({
             ...action.meta || {},
             ident: this.state.id,
             type: action.type,
-            local: true
+            $$l: true
           }
         };
       };

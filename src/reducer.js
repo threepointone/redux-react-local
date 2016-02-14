@@ -87,7 +87,7 @@ function unmount(state, action){
 
 function reduceAll(state, action){
   // update all local keys
-  let {meta} = action,
+  let {meta: {ident, $$l} = {}} = action,
     {$$fns} = state,
     o = {$$fns},
     changed = false;
@@ -95,7 +95,7 @@ function reduceAll(state, action){
   Object.keys($$fns).forEach(key => {
     let $action = action;
     // if this originated from the same key, then add me: true
-    if (meta && key === meta.ident && meta.local){
+    if (key === ident && $$l){
       $action = { ...$action, me: true };
     }
 
