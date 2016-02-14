@@ -29,7 +29,7 @@ import {Root, local} from 'redux-react-local';
 class App extends React.Component{
   render(){
     let {state, dispatch, $} = this.props;
-    return <div onClick={() => dispatch($('increment'))>
+    return <div onClick={() => dispatch($({type: 'increment'}))>
       clicked {state.count} times
     </div>;
   }
