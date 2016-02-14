@@ -4,3 +4,4 @@
 - a better way to integrate with existing redux apps
 - angular et al
 - how is a saga affected when props change?
+- shouldComponentUpdate

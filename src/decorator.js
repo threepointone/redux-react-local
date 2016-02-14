@@ -53,7 +53,7 @@ export default function local({
       };
 
       $ = action => {
-        // 'localize' an event. super conveninent for actions 'local' to this component
+        // 'localize' an event. super convenient for making actions 'local' to this component
         return  {
           ...action,
           type: `${this.state.id}:${action.type}`,
