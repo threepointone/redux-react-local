@@ -10,28 +10,29 @@ warning: the api's in a state of flux right now
 tl;dr
 
 ```jsx
-import {local} from 'redux-react-local';
+import { local } from 'redux-react-local'
 
 // connect your components
 @local({
   ident: 'app',
-  initial: {count: 0},
+  initial: { count: 0 },
   // optionally -
-  reducer(state, action){
-    if(action.me){ // happened 'locally'
-      switch(action.meta.type){
-      // increment decrement etc
+  reducer(state, action) {
+    if(action.me) { // happened 'locally'
+      switch(action.meta.type) {
+        // case: increment decrement etc
+      }
     }
     // reduce on other global dispatches here
-    return state;
+    return state
   }
 })
-class App extends React.Component{
-  render(){
-    let {state, dispatch, $} = this.props;
-    return <div onClick={() => dispatch($({type: 'increment'}))>
+class App extends React.Component {
+  render() {
+    let { state, dispatch, $ } = this.props
+    return (<div onClick={() => dispatch($({ type: 'increment' }))}>
       clicked {state.count} times
-    </div>;
+    </div>)
   }
 }
 ```
@@ -215,7 +216,7 @@ Similar to the above, what I really want is -
 - that 'lives' for the life of that component
 - friendly with the above reducing system
 
-tada, redux-react-local already does this! Just declare a `<Saga/>` in your react tree somewhere. It looks like this -
+tada, [react-redux-saga](https://github.com/threepointone/react-redux-saga) does this! Just declare a `<Saga/>` in your react tree somewhere. It looks like this -
 ```jsx
 let run = function*(getState, props){
   // ...
@@ -231,23 +232,6 @@ This saga 'lives' while it's in the tree, and gets cancelled when it unmounts.
 This gives us our own little 'event loop'/'process' for the component, with all the other goodies from redux-saga. Nice! See the [mousetracking example](https://github.com/threepointone/redux-react-local/blob/master/example/mousetrack.js) for usage.
 
 (A previous version of this had a `*saga` definition directly in the `@local` annotation, but this new method gives finer control of the input to the saga, and decouples it from the library. I plan on releasing this as a separate module soon.)
-
-
-extra - optimistic updates
----
-
-[pending docs](https://github.com/threepointone/redux-react-local/issues/5)
-
-extra - Root
----
-
-- `reducers` - an object with reducers
-- `initial` - initial state of the redux store
-- `middleware` - an array of redux middleware
-
-
-Use `<Root/>` to wrap your app; this sets up a redux store and associated plumbing for sagas, optimistic updates, etc.
-
 
 
 footnotes

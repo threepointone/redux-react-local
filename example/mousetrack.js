@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import {local, Root} from '../src';
+import {local} from '../src';
+import Root from './root';
 import {take, race, put, cps} from 'redux-saga';
-import {Saga} from '../src/sagas';
+import {Saga} from 'react-redux-saga';
 
 // Event iterator
 function events(target, event) {

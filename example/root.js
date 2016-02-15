@@ -6,14 +6,14 @@ import {Provider} from 'react-redux';
 
 // redux-saga
 import createSagaMiddleware from 'redux-saga';
-import {Sagas} from './sagas';
+import {Sagas} from 'react-redux-saga';
 
 // optimist
 import optimist from 'redux-optimist';
-import {Optimist} from './optimist';
+import {Optimist} from 'react-redux-optimist';
 
 // redux-react-local
-import localReducer from './reducer';
+import {reducer} from '../src';
 
 // fsa
 import ensureFSA from './ensure-fsa';
@@ -28,7 +28,7 @@ function makeStore(reducers = {}, initial = {}, middleware = []){
     // reducer
     optimist(combineReducers({
       ...reducers || {},
-      local: localReducer
+      local: reducer
     })),
     // initial state
     initial || {},

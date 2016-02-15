@@ -1,46 +1,46 @@
 /* global describe, it, beforeEach, afterEach */
 
-import React, {Component, PropTypes} from 'react';
-import {render, unmountComponentAtNode} from 'react-dom';
+import React, { Component, PropTypes } from 'react'
+import { render, unmountComponentAtNode } from 'react-dom'
 
-import {createStore, combineReducers} from 'redux';
-import {connect, Provider} from 'react-redux';
+import { createStore, combineReducers } from 'redux'
+import { connect, Provider } from 'react-redux'
 
-import {local, reducer} from '../src';
+import { local, reducer } from '../src'
 
-import expect from 'expect';
-import expectJSX from 'expect-jsx';
-expect.extend(expectJSX);
+import expect from 'expect'
+import expectJSX from 'expect-jsx'
+expect.extend(expectJSX)
 
-class LocalRoot extends Component{
+class LocalRoot extends Component {
   store = createStore(
-    combineReducers({local: reducer})
-  );
-  render(){
-    return <Provider store={this.store}>
+    combineReducers({ local: reducer })
+  )
+  render() {
+    return (<Provider store={this.store}>
       {this.props.children}
-    </Provider>;
+    </Provider>)
   }
 }
 
 describe('redux-react-local', () => {
-  let node;
-  beforeEach(() => node = document.createElement('div'));
-  afterEach(() => unmountComponentAtNode(node));
+  let node
+  beforeEach(() => node = document.createElement('div'))
+  afterEach(() => unmountComponentAtNode(node))
 
   it('should throw when you don\'t include the reducer', () => {
-    let store = createStore(combineReducers({x: (x = {}) => x}));
+    let store = createStore(combineReducers({ x: (x = {}) => x }))
     @local({
       ident: 'app'
     })
-    class App extends Component{
-      render(){
-        return null;
+    class App extends Component {
+      render() {
+        return null
       }
     }
     expect(() =>
-      render(<Provider store={store}><App/></Provider>, node)).toThrow();
-  });
+      render(<Provider store={store}><App/></Provider>, node)).toThrow()
+  })
 
   // ident
   it('passes ident', () => {
@@ -48,55 +48,55 @@ describe('redux-react-local', () => {
     @local({
       ident: 'app'
     })
-    class App extends Component{
-      componentDidMount(){
-        expect(this.props.ident).toEqual('app');
+    class App extends Component {
+      componentDidMount() {
+        expect(this.props.ident).toEqual('app')
       }
-      render(){
-        return null;
+      render() {
+        return null
       }
     }
-    render(<LocalRoot><App/></LocalRoot>, node);
-  });
+    render(<LocalRoot><App/></LocalRoot>, node)
+  })
 
   it('local.register', () => {
     // as below
-  });
+  })
 
   it('should be able to persist and swap between stores', done => {
 
     let opts = {
       ident: props => `faux:${props.faux}`,
       initial: props => props.faux
-    };
+    }
 
-    class Inner extends Component{
-      componentWillMount(){
-        this.props.setState(this.props.state + 1);
+    class Inner extends Component {
+      componentWillMount() {
+        this.props.setState(this.props.state + 1)
       }
-      componentWillReceiveProps(next){
-        if (next.ident !== this.props.ident){
-          next.setState(next.state + 1);
+      componentWillReceiveProps(next) {
+        if (next.ident !== this.props.ident) {
+          next.setState(next.state + 1)
         }
       }
-      render(){
-        return null;
+      render() {
+        return null
       }
     }
 
-    let Inner1 = local(opts)(Inner);
-    let Inner2 = local({...opts, persist: false})(Inner);
+    let Inner1 = local(opts)(Inner)
+    let Inner2 = local({ ...opts, persist: false })(Inner)
 
 
     @connect(state => state)
-    class App extends Component{
-      state = {faux: 1};
-      componentDidMount(){
+    class App extends Component {
+      state = { faux: 1 }
+      componentDidMount() {
         setTimeout(() => {
-          this.setState({faux: 1}, () =>
-            this.setState({faux: 2}, () =>
-              this.setState({faux: 3}, () =>
-                this.setState({faux: 2}, () => {
+          this.setState({ faux: 1 }, () =>
+            this.setState({ faux: 2 }, () =>
+              this.setState({ faux: 3 }, () =>
+                this.setState({ faux: 2 }, () => {
                   expect(omit(this.props.local, '$$fns')).toEqual({
                     // these 3 persisted
                     'faux:1': 2,
@@ -105,77 +105,77 @@ describe('redux-react-local', () => {
 
                     // 6 and 8 evaporate, and 7 came back with fresh data
                     'faux:7': 8
-                  });
-                  done();
-                }))));
+                  })
+                  done()
+                }))))
 
-        }, 200);
+        }, 200)
 
       }
-      render(){
-        return <div>
+      render() {
+        return (<div>
           <Inner1 faux={this.state.faux} key='one'/>
           <Inner2 faux={this.state.faux + 5} key='two'/>
-        </div>;
+        </div>)
 
       }
     }
 
-    render(<LocalRoot><App/></LocalRoot>, node);
-  });
+    render(<LocalRoot><App/></LocalRoot>, node)
+  })
 
-  it('local.unmount');
+  it('local.unmount')
 
   it('ident can use props', () => {
     @local({
       ident: props => `comp:${props.abc}`
     })
-    class App extends Component{
+    class App extends Component {
       static propTypes = {
         abc: PropTypes.string.isRequired
-      };
-      componentDidMount(){
-        expect(this.props.ident).toEqual('comp:xyz');
       }
-      render(){
-        return null;
+      componentDidMount() {
+        expect(this.props.ident).toEqual('comp:xyz')
+      }
+      render() {
+        return null
       }
     }
 
-    render(<LocalRoot><App abc='xyz'/></LocalRoot>, node);
-  });
+    render(<LocalRoot><App abc='xyz'/></LocalRoot>, node)
+  })
 
   it('throws if you don\'t pass ident', () => {
     expect(() => @local()
-    class App extends Component{
-      render(){
-        return null;
+    class App extends Component {
+      render() {
+        return null
       }
-    }).toThrow();
+    }).toThrow()
 
-  });
+  })
 
   it('uses ident as a key for redux store', () => {
     @local({
       ident: 'app',
       initial: 'zzz'
     })
-    class App extends Component{
-      render(){
-        return <Inner/>;
+    class App extends Component {
+      render() {
+        return <Inner/>
       }
     }
 
     @connect(x => x)
-    class Inner extends Component{
-      render(){
-        return <div>{this.props.local.app}</div>;
+    class Inner extends Component {
+      render() {
+        return <div>{this.props.local.app}</div>
       }
     }
 
-    render(<LocalRoot><App /></LocalRoot>, node);
-    expect(node.innerText).toEqual('zzz');
-  });
+    render(<LocalRoot><App /></LocalRoot>, node)
+    expect(node.innerText).toEqual('zzz')
+  })
 
   // state
   it('can have an initial state', () => {
@@ -183,177 +183,177 @@ describe('redux-react-local', () => {
       ident: 'app',
       initial: 999
     })
-    class App extends Component{
-      componentDidMount(){
-        expect(this.props.state).toEqual(999);
+    class App extends Component {
+      componentDidMount() {
+        expect(this.props.state).toEqual(999)
       }
-      render(){
-        return null;
+      render() {
+        return null
       }
     }
-    render(<LocalRoot><App /></LocalRoot>, node);
-  });
+    render(<LocalRoot><App /></LocalRoot>, node)
+  })
 
   it('initial state can use props', () => {
     @local({
       ident: 'app',
       initial: props => props.x + 2
     })
-    class App extends Component{
-      componentDidMount(){
-        expect(this.props.state).toEqual(7);
+    class App extends Component {
+      componentDidMount() {
+        expect(this.props.state).toEqual(7)
       }
-      render(){
-        return null;
+      render() {
+        return null
       }
     }
-    render(<LocalRoot><App x={5}/></LocalRoot>, node);
-  });
+    render(<LocalRoot><App x={5}/></LocalRoot>, node)
+  })
 
   it('accepts a reducer that gets called on all actions', () => {
     @local({
       ident: 'app',
       initial: 0,
-      reducer(state, {type, payload}){
-        if (type === 'xyz'){
-          return state + payload;
+      reducer(state, { type, payload }) {
+        if (type === 'xyz') {
+          return state + payload
         }
-        return state;
+        return state
       }
     })
-    class App extends Component{
-      componentDidMount(){
-        let {dispatch} = this.props;
-        expect(typeof dispatch).toEqual('function');
-        dispatch({type: 'xyz', payload: 1});
-        dispatch({type: 'xyz', payload: 1});
-        dispatch({type: 'xyz', payload: 1});
+    class App extends Component {
+      componentDidMount() {
+        let { dispatch } = this.props
+        expect(typeof dispatch).toEqual('function')
+        dispatch({ type: 'xyz', payload: 1 })
+        dispatch({ type: 'xyz', payload: 1 })
+        dispatch({ type: 'xyz', payload: 1 })
       }
-      render(){
-        return <div>{this.props.state}</div>;
+      render() {
+        return <div>{this.props.state}</div>
       }
     }
-    render(<LocalRoot><App /></LocalRoot>, node);
-    expect(node.innerText).toEqual('3');
+    render(<LocalRoot><App /></LocalRoot>, node)
+    expect(node.innerText).toEqual('3')
 
-  });
+  })
   it('gets called on all actions', () => {
     // as above
-  });
+  })
 
   it('updates when state changes', () => {
     // as above
-  });
+  })
 
   it('passes the redux dispatch function', () => {
     // as above
-  });
+  })
 
   it('passes a \'localization\' helper', () => {
     @local({
       ident: 'app'
     })
-    class App extends Component{
-      componentDidMount(){
-        expect(this.props.$({type: 'name', payload: {some: 'payload'}})).toEqual({
+    class App extends Component {
+      componentDidMount() {
+        expect(this.props.$({ type: 'name', payload: { some: 'payload' } })).toEqual({
           type: 'app:name',
-          payload: {some: 'payload'},
+          payload: { some: 'payload' },
           meta: {
             ident: 'app',
             type: 'name',
             $$l: true
           }
-        });
+        })
       }
-      render(){
-        return null;
+      render() {
+        return null
       }
     }
-    render(<LocalRoot><App /></LocalRoot>, node);
-  });
+    render(<LocalRoot><App /></LocalRoot>, node)
+  })
   it('local events have meta information', () => {
     // as above
-  });
+  })
 
   it('local actions can be detected', () => {
-    class App extends Component{
-      componentDidMount(){
-        this.props.dispatch(this.props.$({type: 'beep', payload: 10}));
+    class App extends Component {
+      componentDidMount() {
+        this.props.dispatch(this.props.$({ type: 'beep', payload: 10 }))
       }
-      render(){
-        return <span>{this.props.state}</span>;
+      render() {
+        return <span>{this.props.state}</span>
       }
     }
 
     let App1 = local({
       ident: 'one',
       initial: 10,
-      reducer(state, {me, meta, payload}){
+      reducer(state, { me, meta, payload }) {
 
-        if (me && meta.type === 'beep'){
-          return state + payload;
+        if (me && meta.type === 'beep') {
+          return state + payload
         }
         // alternately, you could test for 'one:beep',
         // but this is cumbersome, and gets harder for props generated idents
-        return state;
+        return state
       }
-    })(App);
+    })(App)
 
     let App2 = local({
       ident: 'two',
       initial: 100,
-      reducer(state, {me, meta, payload}){
-        if (me && meta.type === 'beep'){
-          return state * payload;
+      reducer(state, { me, meta, payload }) {
+        if (me && meta.type === 'beep') {
+          return state * payload
         }
-        return state;
+        return state
       }
-    })(App);
+    })(App)
 
     render(<LocalRoot>
       <div>
         <App1 />:<App2 />
       </div>
-    </LocalRoot>, node);
+    </LocalRoot>, node)
 
-    expect(node.innerText).toEqual('20:1000');
+    expect(node.innerText).toEqual('20:1000')
 
-  });
+  })
 
-  it(`can 'setState' locally`, () => {
+  it('can \'setState\' locally', () => {
 
     @local({
       ident: 'app',
-      initial: {value: 0}
+      initial: { value: 0 }
     })
-    class App extends Component{
-      componentDidMount(){
-        let {setState, state} = this.props;
-        setState({value: state.value + 1});
+    class App extends Component {
+      componentDidMount() {
+        let { setState, state } = this.props
+        setState({ value: state.value + 1 })
       }
-      render(){
-        let {value} = this.props.state;
-        return <div>{value}</div>;
+      render() {
+        let { value } = this.props.state
+        return <div>{value}</div>
       }
     }
 
-    render(<LocalRoot><App /></LocalRoot>, node);
-    expect(node.innerText).toEqual('1');
+    render(<LocalRoot><App /></LocalRoot>, node)
+    expect(node.innerText).toEqual('1')
 
-  });
+  })
 
 
-});
+})
 
-const has = {}.hasOwnProperty;
+const has = {}.hasOwnProperty
 
 function omit(obj, key) {
-  if (!obj::has(key)){
-    return obj;
+  if (!obj::has(key)) {
+    return obj
   }
   return Object.keys(obj).reduce((o, k) =>
     k === key ?
       o :
       (o[k] = obj[k], o),
-    {});
+    {})
 }

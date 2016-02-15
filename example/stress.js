@@ -1,8 +1,9 @@
 import React, {PropTypes, Component} from 'react';
 import {render} from 'react-dom';
-import {Root, local} from '../src';
+import {local} from '../src';
+import Root from './root';
 import {cps, call} from 'redux-saga';
-import {Saga} from '../src/sagas';
+import {Saga} from 'react-redux-saga';
 
 import styles from './stress.css';
 

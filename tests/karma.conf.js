@@ -1,12 +1,7 @@
 module.exports = function(config){
   config.set({
     browsers: ['Chrome'],
-    files: ['../node_modules/babel-polyfill/dist/polyfill.js',
-      './index.js',
-      './root.js',
-      './optimist.js',
-      './sagas.js'
-    ],
+    files: ['../node_modules/babel-polyfill/dist/polyfill.js','./index.js'],
     reporters: ['mocha', 'coverage'],
     mochaReporter: {
       output: 'autowatch'

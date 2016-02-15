@@ -1,17 +1,17 @@
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
 
-const has = {}.hasOwnProperty;
+const has = {}.hasOwnProperty
 
 function omit(obj, key) {
-  if (!obj::has(key)){
-    return obj;
+  if (!obj::has(key)) {
+    return obj
   }
   return Object.keys(obj).reduce((o, k) =>
     k === key ?
       o :
       (o[k] = obj[k], o),
-    {});
+    {})
 }
 
 
@@ -20,36 +20,36 @@ export default function local({
   initial = {},     // value / ƒ(props)
   reducer = x => x, // ƒ(state, action) => state
   persist = true    // can swap out state on unmount
-} = {}){
-  if (!ident){
-    throw new Error('cannot annotate with @local without an ident');
+} = {}) {
+  if (!ident) {
+    throw new Error('cannot annotate with @local without an ident')
   }
 
-  function getId(props){
-    if (typeof ident === 'string'){
-      return ident;
+  function getId(props) {
+    if (typeof ident === 'string') {
+      return ident
     }
-    return ident(props);
+    return ident(props)
   }
 
-  function getInitial(props){
-    if (typeof initial !== 'function'){
-      return initial;
+  function getInitial(props) {
+    if (typeof initial !== 'function') {
+      return initial
     }
-    return initial(props);
+    return initial(props)
   }
 
-  return function(Target){
+  return function (Target) {
 
     return @connect((state, props) => {
-      if (!state.local){
-        throw new Error('did you forget to add the `local` reducer?');
+      if (!state.local) {
+        throw new Error('did you forget to add the `local` reducer?')
       }
       return {
         $$local: state.local[getId(props)]
-      };
+      }
     })
-    class ReduxReactLocal extends Component{
+    class ReduxReactLocal extends Component {
       static displayName = 'local:' + (Target.displayName || Target.name);
 
       state = {
@@ -68,15 +68,15 @@ export default function local({
             type: action.type,
             $$l: true
           }
-        };
+        }
       };
 
       _setState = state => {
-        this.props.dispatch({type: '$$local.setState', payload: {state, ident: this.state.id}});
+        this.props.dispatch({ type: '$$local.setState', payload: { state, ident: this.state.id } })
         // should we setState here too?
       };
 
-      componentWillMount(){
+      componentWillMount() {
 
         this.props.dispatch({
           type: '$$local.register',
@@ -86,14 +86,14 @@ export default function local({
             reducer,
             persist
           }
-        });
+        })
       }
 
-      componentWillReceiveProps(next){
-        let id = getId(next);
+      componentWillReceiveProps(next) {
+        let id = getId(next)
 
-        if (id !== this.state.id){
-          let init = getInitial(next);
+        if (id !== this.state.id) {
+          let init = getInitial(next)
           this.props.dispatch({
             type: '$$local.swap',
             payload: {
@@ -103,27 +103,27 @@ export default function local({
               reducer,
               persist
             }
-          });
-          this.setState({ id, value: next.$$local !== undefined ? next.$$local : init });
+          })
+          this.setState({ id, value: next.$$local !== undefined ? next.$$local : init })
         }
         else {
-          this.setState({ value: next.$$local });
+          this.setState({ value: next.$$local })
         }
 
       }
 
-      componentWillUnmount(){
+      componentWillUnmount() {
         this.props.dispatch({
           type: '$$local.unmount',
           payload: {
             ident: this.state.id,
             persist
           }
-        });
+        })
       }
 
-      render(){
-        return <Target
+      render() {
+        return (<Target
           {...omit(this.props, '$$local')}
           $={this.$}
           ident={this.state.id}
@@ -131,9 +131,9 @@ export default function local({
           state={this.state.value}
           setState={this._setState}>
             {this.props.children}
-        </Target>;
+        </Target>)
       }
-    };
-  };
+    }
+  }
 }
 
