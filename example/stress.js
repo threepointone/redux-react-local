@@ -1,54 +1,54 @@
-import React, {PropTypes, Component} from 'react';
-import {render} from 'react-dom';
-import {local} from '../src';
-import Root from './root';
-import {cps, call} from 'redux-saga';
-import {Saga} from 'react-redux-saga';
+import React, { PropTypes, Component } from 'react'
+import { render } from 'react-dom'
+import { local } from '../src'
+import Root from './root'
+import { cps, call } from 'redux-saga'
+import { Saga } from 'react-redux-saga'
 
-import styles from './stress.css';
+import styles from './stress.css'
 
-function sleep(period, done){
-  setTimeout(() => done(null, true), period);
+function sleep(period, done) {
+  setTimeout(() => done(null, true), period)
 }
 
 
 @local({
-  ident: ({id}) => `cell:${id}`,
+  ident: ({ id }) => `cell:${id}`,
   initial: () => Math.random() * 100
 })
-class Cell extends Component{
+class Cell extends Component {
   static propTypes = {
     period: PropTypes.number.isRequired
   };
-  *saga(_, {period, setState}){
-    while (true){
-      yield cps(sleep, period);
-      yield call(setState, Math.random());
+  *saga(_, { period, setState }) {
+    while (true) {
+      yield cps(sleep, period)
+      yield call(setState, Math.random())
     }
   }
-  render(){
-    return <div className={styles.cell} style={{opacity: this.props.state}} >
+  render() {
+    return (<div className={styles.cell} style={{ opacity: this.props.state }} >
       <Saga saga={this.saga} period={this.props.period} setState={this.props.setState}/>
-    </div>;
+    </div>)
   }
 }
 
-function times(n, fn){
-  let arr = [];
-  for (let i = 0; i < n; i++){
-    arr.push(fn(i));
+function times(n, fn) {
+  let arr = []
+  for (let i = 0; i < n; i++) {
+    arr.push(fn(i))
   }
-  return arr;
+  return arr
 }
 
 class App extends Component {
   render() {
-    return <div onClick={this.onClick}>
+    return (<div onClick={this.onClick}>
       {times(400, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
-    </div>;
+    </div>)
   }
 }
 
 
-render(<Root><App /></Root>, document.getElementById('app'));
+render(<Root><App /></Root>, document.getElementById('app'))
 

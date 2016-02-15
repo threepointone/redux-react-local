@@ -1,85 +1,85 @@
-import React, {Component} from 'react';
-import {render} from 'react-dom';
-import {local} from '../src';
-import Root from './root';
-import {take, race, put, cps} from 'redux-saga';
-import {Saga} from 'react-redux-saga';
+import React, { Component } from 'react'
+import { render } from 'react-dom'
+import { local } from '../src'
+import Root from './root'
+import { take, race, put, cps } from 'redux-saga'
+import { Saga } from 'react-redux-saga'
 
 // Event iterator
 function events(target, event) {
   let fns = [], handler = e => {
-    fns.forEach(fn => fn(null, e));
-    fns = [];
-  };
-  target.addEventListener(event, handler);
+      fns.forEach(fn => fn(null, e))
+      fns = []
+    }
+  target.addEventListener(event, handler)
 
   return {
     next(fn) {
-      fns.push(fn);
+      fns.push(fn)
     },
-    dispose(){
-      target.removeEventListener(event, handler);
-      fns = handler = null;
+    dispose() {
+      target.removeEventListener(event, handler)
+      fns = handler = null
     }
-  };
+  }
 }
 
 @local({
   ident: 'app',
-  initial: {active: false},
-  reducer(state, {me, meta, payload: {pageX, pageY} = {}}){
-    if (me){
-      switch (meta.type){
-        case 'mousedown': return {...state, x: pageX, y: pageY, active: true};
-        case 'mousemove': return {...state, x: pageX, y: pageY};
-        case 'mouseup'  : return {...state, active: false};
+  initial: { active: false },
+  reducer(state, { me, meta, payload: { pageX, pageY } = {} }) {
+    if (me) {
+      switch (meta.type) {
+        case 'mousedown': return { ...state, x: pageX, y: pageY, active: true }
+        case 'mousemove': return { ...state, x: pageX, y: pageY }
+        case 'mouseup'  : return { ...state, active: false }
       }
     }
-    return state;
+    return state
   }
 })
-class App extends Component{
-  *saga(_, {$}){
-    while (true){
-      yield take('app:mousedown');
+class App extends Component {
+  *saga(_, { $ }) {
+    while (true) {
+      yield take('app:mousedown')
 
       // start listening to mousemove and mouseup events
-      let up$ = events(window, 'mouseup');
-      let move$ = events(window, 'mousemove');
+      let up$ = events(window, 'mouseup')
+      let move$ = events(window, 'mousemove')
 
-      while (true){
-        let {up, move} = yield race({
+      while (true) {
+        let { up, move } = yield race({
           up: cps(up$.next),
           move: cps(move$.next)
-        });
+        })
 
-        if (move){
-          yield put($({type: 'mousemove', payload: move}));
+        if (move) {
+          yield put($({ type: 'mousemove', payload: move }))
         }
         else {
-          yield put($({type: 'mouseup', payload: up}));
-          break;
+          yield put($({ type: 'mouseup', payload: up }))
+          break
         }
       }
 
       // cleanup
-      up$.dispose();
-      move$.dispose();
+      up$.dispose()
+      move$.dispose()
     }
 
   }
   onMouseDown = e => {
-    let {$, dispatch} = this.props;
-    dispatch($({type: 'mousedown', payload: e}));
-  };
-  render(){
-    let {active, x, y} = this.props.state;
-    return <div onMouseDown={this.onMouseDown}>
+    let { $, dispatch } = this.props
+    dispatch($({ type: 'mousedown', payload: e }))
+  }
+  render() {
+    let { active, x, y } = this.props.state
+    return (<div onMouseDown={this.onMouseDown}>
       <Saga saga={this.saga} $={this.props.$}/>
       <span>{active ? `${x}:${y}` : 'click and drag'}</span>
-    </div>;
+    </div>)
   }
 }
 
-render(<Root><App/></Root>, window.app);
+render(<Root><App/></Root>, window.app)
 
