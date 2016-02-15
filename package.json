@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "NODE_ENV=production babel src -d lib",
-    "start": "./node_modules/.bin/webpack-dev-server --hot --inline --config webpack.config.js",
+    "start": "./node_modules/.bin/webpack-dev-server --hot --inline --port 3000 --config webpack.config.js",
     "test": "NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/.bin/karma start tests/karma.conf.js --single-run"
   },
   "keywords": [

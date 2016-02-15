@@ -1,7 +1,7 @@
 var path = require('path');
 module.exports = {
   entry: {
-    app: ['babel-polyfill', './example/mousetrack.js']
+    app: ['babel-polyfill', './example/transplant.js']
   },
   output: {
     path: path.join(__dirname, './example'),
