@@ -5,13 +5,12 @@ import {connect} from 'react-redux';
 import {local, Root} from '../src';
 
 @local({
-  ident: 'app',
+  ident: 'counter',
   initial: 0
 })
 class Counter extends Component{
-  onClick = () => {
+  onClick = () =>
     this.props.setState(this.props.state + 1);
-  };
   render(){
     return <button onClick={this.onClick}>
       clicked {this.props.state} times
@@ -23,7 +22,7 @@ class Counter extends Component{
 class Debug extends Component{
   render(){
     return <div>
-      debugging: {this.props.app}
+      debugging: {this.props.counter}
     </div>;
   }
 }
