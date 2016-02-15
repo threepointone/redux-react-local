@@ -27,6 +27,21 @@ describe('redux-react-local', () => {
   let node;
   beforeEach(() => node = document.createElement('div'));
   afterEach(() => unmountComponentAtNode(node));
+
+  it('should throw when you don\'t include the reducer', () => {
+    let store = createStore(combineReducers({x: (x = {}) => x}));
+    @local({
+      ident: 'app'
+    })
+    class App extends Component{
+      render(){
+        return null;
+      }
+    }
+    expect(() =>
+      render(<Provider store={store}><App/></Provider>, node)).toThrow();
+  });
+
   // ident
   it('passes ident', () => {
 

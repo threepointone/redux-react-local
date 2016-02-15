@@ -41,9 +41,14 @@ export default function local({
 
   return function(Target){
 
-    return @connect((state, props) => ({
-      $$local: state.local[getId(props)]
-    }))
+    return @connect((state, props) => {
+      if (!state.local){
+        throw new Error('did you forget to add the `local` reducer?');
+      }
+      return {
+        $$local: state.local[getId(props)]
+      };
+    })
     class ReduxReactLocal extends Component{
       static displayName = 'local:' + (Target.displayName || Target.name);
 
@@ -68,9 +73,11 @@ export default function local({
 
       _setState = state => {
         this.props.dispatch({type: '$$local.setState', payload: {state, ident: this.state.id}});
+        // should we setState here too?
       };
 
       componentWillMount(){
+
         this.props.dispatch({
           type: '$$local.register',
           payload: {
