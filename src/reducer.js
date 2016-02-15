@@ -38,7 +38,7 @@ function register(state, action){
     throw new Error('cannot have an ident named `$$fns`, sorry!');
   }
 
-  if (fn && fn !== identity){
+  if (fn && fn !== identity && fn !== reducer){
     // todo - throw, but not when hot reloading
     console.warn(`${ident} already exists, swapping anyway`);
   }
