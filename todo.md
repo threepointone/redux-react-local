@@ -4,7 +4,6 @@
 - angular et al
 - how is a saga affected when props change?
 - shouldComponentUpdate
-- state transplanting
 - optional idents?
-
+- move away from connect, directly subscribe
 
