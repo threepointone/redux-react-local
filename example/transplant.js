@@ -6,23 +6,16 @@ import {local, Root} from '../src';
 
 @local({
   ident: 'app',
-  initial: 0,
-  reducer(state, {type}){
-    if (type === 'increment'){
-      return state + 1;
-    }
-    return state;
-  }
+  initial: 0
 })
 class Counter extends Component{
   onClick = () => {
-    this.props.dispatch({type: 'increment'});
+    this.props.setState(this.props.state + 1);
   };
   render(){
-    return <div>
-      <button onClick={this.onClick}>clicked {this.props.state} times</button>
-
-    </div>;
+    return <button onClick={this.onClick}>
+      clicked {this.props.state} times
+    </button>;
   }
 }
 

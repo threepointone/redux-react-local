@@ -31,7 +31,7 @@ function events(target, event) {
       switch (meta.type){
         case 'mousedown': return {...state, x: pageX, y: pageY, active: true};
         case 'mousemove': return {...state, x: pageX, y: pageY};
-        case 'mouseup': return {...state, active: false};
+        case 'mouseup'  : return {...state, active: false};
       }
     }
     return state;
