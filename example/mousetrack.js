@@ -40,14 +40,14 @@ function events(target, event) {
 })
 class App extends Component {
   *saga(_, { $ }) {
-    while (true) {
+    while (true) {  //eslint-disable-line no-constant-condition
       yield take('app:mousedown')
 
       // start listening to mousemove and mouseup events
       let up$ = events(window, 'mouseup')
       let move$ = events(window, 'mousemove')
 
-      while (true) {
+      while (true) {  //eslint-disable-line no-constant-condition
         let { up, move } = yield race({
           up: cps(up$.next),
           move: cps(move$.next)
@@ -74,10 +74,10 @@ class App extends Component {
   }
   render() {
     let { active, x, y } = this.props.state
-    return (<div onMouseDown={this.onMouseDown}>
+    return <div onMouseDown={this.onMouseDown}>
       <Saga saga={this.saga} $={this.props.$}/>
       <span>{active ? `${x}:${y}` : 'click and drag'}</span>
-    </div>)
+    </div>
   }
 }
 

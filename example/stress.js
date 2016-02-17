@@ -21,15 +21,15 @@ class Cell extends Component {
     period: PropTypes.number.isRequired
   };
   *saga(_, { period, setState }) {
-    while (true) {
+    while (true) {  //eslint-disable-line no-constant-condition
       yield cps(sleep, period)
       yield call(setState, Math.random())
     }
   }
   render() {
-    return (<div className={styles.cell} style={{ opacity: this.props.state }} >
-      <Saga saga={this.saga} period={this.props.period} setState={this.props.setState}/>
-    </div>)
+    return <div className={styles.cell} style={{ opacity: this.props.state }}>
+      <Saga saga={this.saga} period={this.props.period} setState={this.props.setState} />
+    </div>
   }
 }
 
@@ -43,9 +43,9 @@ function times(n, fn) {
 
 class App extends Component {
   render() {
-    return (<div onClick={this.onClick}>
+    return <div onClick={this.onClick}>
       {times(400, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
-    </div>)
+    </div>
   }
 }
 

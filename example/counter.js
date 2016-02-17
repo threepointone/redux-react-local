@@ -21,9 +21,9 @@ class App extends Component {
     dispatch($({ type: 'increment' }))
   };
   render() {
-    return (<div onClick={this.onClick}>
+    return <div onClick={this.onClick}>
       clicked {this.props.state} times
-    </div>)
+    </div>
   }
 }
 

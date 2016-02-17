@@ -64,12 +64,12 @@ export default class Root extends Component {
   )
 
   render() {
-    return (<Provider store={this.store}>
+    return <Provider store={this.store}>
       <Sagas middleware={this.sagaMiddleware}>
         <Optimist>
           {this.props.children}
         </Optimist>
       </Sagas>
-    </Provider>)
+    </Provider>
   }
 }

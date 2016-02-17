@@ -123,7 +123,7 @@ export default function local({
       }
 
       render() {
-        return (<Target
+        return <Target
           {...omit(this.props, '$$local')}
           $={this.$}
           ident={this.state.id}
@@ -131,7 +131,7 @@ export default function local({
           state={this.state.value}
           setState={this._setState}>
             {this.props.children}
-        </Target>)
+        </Target>
       }
     }
   }

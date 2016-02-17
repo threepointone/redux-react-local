@@ -30,11 +30,11 @@ class Debug extends Component {
 
 class App extends Component {
   render() {
-    return (<div>
+    return <div>
       <Counter/>
       <Counter/>
       <Debug/>
-    </div>)
+    </div>
   }
 }
 
