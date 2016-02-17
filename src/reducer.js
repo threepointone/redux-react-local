@@ -24,6 +24,10 @@ export default function localReducer(state = { $$fns: {} }, action) {
 }
 
 function setState(state, { payload }) {
+  // todo - test for undefined
+  if(payload.state === undefined) {
+    throw new Error('cannot set undefined as local state')
+  }
   return {
     ...state,
     [payload.ident]: payload.state
@@ -40,7 +44,7 @@ function register(state, action) {
 
   if (fn && fn !== identity && fn !== reducer) {
     // todo - throw, but not when hot reloading
-    console.warn(`${ident} already exists, swapping anyway`) // eslint-disable-line
+    console.warn(`${ident} already exists, swapping anyway`) // eslint-disable-line no-console
   }
 
   return {
@@ -87,7 +91,7 @@ function unmount(state, action) {
 
 function reduceAll(state, action) {
   // update all local keys
-  let { meta: { ident, $$l } = {} } = action,
+  let { meta: { ident, local } = {} } = action,
     { $$fns } = state,
     o = { $$fns },
     changed = false
@@ -95,14 +99,14 @@ function reduceAll(state, action) {
   Object.keys($$fns).forEach(key => {
     let $action = action
     // if this originated from the same key, then add me: true
-    if (key === ident && $$l) {
+    if (key === ident && local) {
       $action = { ...$action, me: true }
     }
 
     // reduce
     let computed = $$fns[key](state[key], $action)
     if (computed === undefined) {
-      console.warn(`did you forget to return state from the ${key} reducer?`) // eslint-disable-line
+      console.warn(`did you forget to return state from the ${key} reducer?`) // eslint-disable-line no-console
     }
 
     if (computed !== state[key]) {

@@ -20,7 +20,7 @@ import ensureFSA from './ensure-fsa'
 
 // perf
 import { batchedSubscribe } from 'redux-batched-subscribe'
-import { unstable_batchedUpdates as batchedUpdates } from 'react-dom'
+import { unstable_batchedUpdates } from 'react-dom'
 
 function makeStore(reducers = {}, initial = {}, middleware = []) {
   // create a redux store
@@ -33,7 +33,7 @@ function makeStore(reducers = {}, initial = {}, middleware = []) {
     // initial state
     initial || {},
     // middleware
-    compose(applyMiddleware(...middleware), batchedSubscribe(batchedUpdates))
+    compose(applyMiddleware(...middleware), batchedSubscribe(unstable_batchedUpdates))
   )
 }
 

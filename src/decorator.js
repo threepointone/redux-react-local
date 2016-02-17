@@ -25,6 +25,10 @@ export default function local({
     throw new Error('cannot annotate with @local without an ident')
   }
 
+  // if (!initial) {
+  //   throw new Error('cannot annotate with @local without an initial state')
+  // }
+
   function getId(props) {
     if (typeof ident === 'string') {
       return ident
@@ -54,7 +58,7 @@ export default function local({
 
       state = {
         id: getId(this.props),
-        value: getInitial(this.props)
+        value: this.props.$$local !== undefined ? this.props.$$local : getInitial(this.props)
       };
 
       $ = action => {
@@ -66,14 +70,14 @@ export default function local({
             ...action.meta || {},
             ident: this.state.id,
             type: action.type,
-            $$l: true
+            local: true
           }
         }
       };
 
       _setState = state => {
         this.props.dispatch({ type: '$$local.setState', payload: { state, ident: this.state.id } })
-        // should we setState here too?
+        this.setState({ value: state })
       };
 
       componentWillMount() {

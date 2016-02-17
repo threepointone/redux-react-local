@@ -13,27 +13,27 @@ class Counter extends Component {
   onClick = () =>
     this.props.setState(this.props.state + 1);
   render() {
-    return (<button onClick={this.onClick}>
+    return <button onClick={this.onClick}>
       clicked {this.props.state} times
-    </button>)
+    </button>
   }
 }
 
 @connect(state => state.local)
 class Debug extends Component {
   render() {
-    return (<div>
+    return <div>
       debugging: {this.props.counter}
-    </div>)
+    </div>
   }
 }
 
 class App extends Component {
   render() {
     return <div>
-      <Counter/>
-      <Counter/>
-      <Debug/>
+      <Counter />
+      <Counter />
+      <Debug />
     </div>
   }
 }

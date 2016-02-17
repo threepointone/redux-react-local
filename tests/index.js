@@ -261,7 +261,7 @@ describe('redux-react-local', () => {
           meta: {
             ident: 'app',
             type: 'name',
-            $$l: true
+            local: true
           }
         })
       }
@@ -339,6 +339,25 @@ describe('redux-react-local', () => {
 
     render(<LocalRoot><App /></LocalRoot>, node)
     expect(node.innerText).toEqual('1')
+
+  })
+
+  it('setState throws on undefined', () => {
+    @local({
+      ident: 'app',
+      initial: 0
+    })
+    class App extends Component {
+      componentDidMount() {
+        this.props.setState()
+      }
+      render() {
+        return <div>{this.props.state}</div>
+      }
+    }
+
+
+    expect(() => render(<LocalRoot><App /></LocalRoot>, node)).toThrow()
 
   })
 
