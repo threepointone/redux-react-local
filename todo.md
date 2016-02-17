@@ -6,5 +6,4 @@
 - shouldComponentUpdate
 - optional idents?
 - move away from connect, directly subscribe
-- hot loading
 - deal with props.setState in componentWillMount
