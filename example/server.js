@@ -12,21 +12,13 @@ import {
 } from '../src/server'
 
 
-function makeStore(initial) {
-  return createStore(combineReducers({
-    local: reducer
-  }), initial)
-}
-
-
 @local({
   ident: 'counter',
   initial: 0,
   reducer(state, { type }) {
-    if(type === 'increment') {
-      return state + 1
-    }
-    return state
+    return type === 'increment' ?
+      state + 1 :
+      state
   }
 })
 class Counter extends Component {
@@ -44,25 +36,28 @@ class App extends Component {
   }
 }
 
-let s = makeStore()
+let store = createStore(combineReducers({
+  local: reducer
+}))
+
 
 // this parses the reducers out the tree and preps the store
 // side effectful!
-resolveLocalReducers(<App store={s}></App>)
+resolveLocalReducers(<App store={store}></App>)
 
 // dispatch some actions
-s.dispatch({ type: 'increment' })
-s.dispatch({ type: 'increment' })
-s.dispatch({ type: 'increment' })
+store.dispatch({ type: 'increment' })
+store.dispatch({ type: 'increment' })
+store.dispatch({ type: 'increment' })
 
 // render to html
 console.log(
-  renderToString(<App store={s} />)
+  renderToString(<App store={store} />)
   )
 // <div>3</div>
 
 // prep state for serialization
-const serialized = stringifySafe(s.getState())
+const serialized = stringifySafe(store.getState())
 
 console.log(
   JSON.stringify(serialized)
