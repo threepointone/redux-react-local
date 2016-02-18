@@ -43,7 +43,7 @@ let store = createStore(combineReducers({
 
 // this parses the reducers out the tree and preps the store
 // side effectful!
-resolveLocalReducers(<App store={store}></App>)
+resolveLocalReducers(<App store={store}/>)
 
 // dispatch some actions
 store.dispatch({ type: 'increment' })
