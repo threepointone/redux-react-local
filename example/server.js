@@ -6,9 +6,7 @@ import { local, reducer } from '../src'
 
 import {
   // transforms redux state atom into one that can be JSON.stringify'ed
-  stringifySafe,
-  // preps a redux store with the all local reducers/state in a react element
-  resolveLocalReducers
+  stringifySafe
 } from '../src/server'
 
 
@@ -28,38 +26,33 @@ class Counter extends Component {
 }
 
 
-class App extends Component {
-  render() {
-    return <Provider store={this.props.store}>
-      <Counter/>
-    </Provider>
-  }
-}
-
 let store = createStore(combineReducers({
   local: reducer
 }))
 
 
-// this parses the reducers out the tree and preps the store
+// do a throwaway renderToString to parses the reducers out the tree and preps the store
 // side effectful!
-resolveLocalReducers(<App store={store}/>)
+renderToString(<Provider store={store}>
+  <Counter/>
+</Provider>)
 
 // dispatch some actions
 store.dispatch({ type: 'increment' })
 store.dispatch({ type: 'increment' })
 store.dispatch({ type: 'increment' })
 
-// render to html
-console.log(
-  renderToString(<App store={store} />)
-  )
+// actually render to final html
+console.log(  // eslint-disable-line no-console
+  renderToString(<Provider store={store}>
+  <Counter/>
+</Provider>))
 // <div>3</div>
 
 // prep state for serialization
 const serialized = stringifySafe(store.getState())
 
-console.log(
+console.log(  // eslint-disable-line no-console
   JSON.stringify(serialized)
   )
 
@@ -68,4 +61,3 @@ console.log(
 
 // on the client side, use this json as your redux store's initial state as usual
 // that's it!
-
