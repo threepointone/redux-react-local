@@ -31,7 +31,8 @@ let store = createStore(combineReducers({
 }))
 
 
-// do a throwaway renderToString to parses the reducers out the tree and preps the store
+// do a throwaway renderToString to 'parse'
+// the reducers out the tree and prep the store
 // side effectful!
 renderToString(<Provider store={store}>
   <Counter/>
@@ -45,16 +46,15 @@ store.dispatch({ type: 'increment' })
 // actually render to final html
 console.log(  // eslint-disable-line no-console
   renderToString(<Provider store={store}>
-  <Counter/>
-</Provider>))
+    <Counter/>
+  </Provider>))
 // <div>3</div>
 
 // prep state for serialization
 const serialized = stringifySafe(store.getState())
 
 console.log(  // eslint-disable-line no-console
-  JSON.stringify(serialized)
-  )
+  JSON.stringify(serialized))
 
 // {"local":{"$$fns":{},"counter":3}}
 

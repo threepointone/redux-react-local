@@ -2,7 +2,7 @@ import React, { PropTypes, Component } from 'react'
 import { render } from 'react-dom'
 import { local } from '../src'
 import Root from './root'
-import { cps, call } from 'redux-saga'
+import { cps, call } from 'redux-saga/effects'
 import { Saga } from 'react-redux-saga'
 
 import styles from './stress.css'

@@ -96,7 +96,11 @@ function reduceAll(state, action) {
     o = { $$fns },
     changed = false
 
-  Object.keys($$fns).forEach(key => {
+  Object.keys(state).forEach(key => {
+    if(key === '$$fns') {
+      return
+    }
+
     let $action = action
     // if this originated from the same key, then add me: true
     if (key === ident && local) {
