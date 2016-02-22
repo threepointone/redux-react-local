@@ -108,7 +108,7 @@ function reduceAll(state, action) {
     }
 
     // reduce
-    let computed = $$fns[key](state[key], $action)
+    let computed = ($$fns[key] || identity)(state[key], $action)
     if (computed === undefined) {
       console.warn(`did you forget to return state from the ${key} reducer?`) // eslint-disable-line no-console
     }
