@@ -22,50 +22,50 @@ import ensureFSA from './ensure-fsa'
 import { batchedSubscribe } from 'redux-batched-subscribe'
 import { unstable_batchedUpdates } from 'react-dom'
 
-function makeStore(reducers = {}, initial = {}, middleware = []) {
+export function makeStore(reducers = {}, initial = {}, middleware = []) {
+  let sagaMiddleware = createSagaMiddleware()
   // create a redux store
-  return createStore(
+  const store = createStore(
     // reducer
     optimist(combineReducers({
-      ...reducers || {},
+      ...reducers,
       local: reducer
     })),
+
     // initial state
     initial || {},
+
     // middleware
-    compose(applyMiddleware(...middleware), batchedSubscribe(unstable_batchedUpdates))
+    compose(
+      applyMiddleware(...(function *() {
+        yield* middleware
+        yield sagaMiddleware
+        if (process.env.NODE_ENV === 'development') {
+          yield ensureFSA
+        }
+      }())),
+      batchedSubscribe(unstable_batchedUpdates))
   )
+
+  store.sagas = sagaMiddleware
+  return store
 }
 
 
 export default class Root extends Component {
   // optionally accept middleware/reducers to add on to the redux store
   static propTypes = {
-    middleware: PropTypes.array,
-    reducers: PropTypes.object
+    store: PropTypes.shape({
+      subscribe: PropTypes.func.isRequired,
+      dispatch: PropTypes.func.isRequired,
+      getState: PropTypes.func.isRequired
+    })
   };
-
-  *middle() {
-    if (this.props.middleware) {
-      yield* this.props.middleware
-    }
-    yield this.sagaMiddleware
-    if (process.env.NODE_ENV === 'development') {
-      yield ensureFSA
-    }
-  }
-
-  sagaMiddleware = createSagaMiddleware()
-
-  store = makeStore(
-    this.props.reducers,
-    this.props.initial,
-    this.middle()
-  )
-
+  store = this.props.store ||
+    makeStore(this.props.reducers, this.props.initial, this.props.middleware)
   render() {
     return <Provider store={this.store}>
-      <Sagas middleware={this.sagaMiddleware}>
+      <Sagas middleware={this.store.sagas}>
         <Optimist>
           {this.props.children}
         </Optimist>

@@ -11,8 +11,7 @@ tl;dr
 
 #### longer explanation
 
-discussions -
- - https://github.com/facebook/react/issues/1739
+([react/#1739](a https://github.com/facebook/react/issues/1739))
 
 server side rendering with react booboos -
 
@@ -24,8 +23,7 @@ server side rendering with react booboos -
 - as an aside, this is also why you never attach an external event handler in componentWillMount, if you expect to unmount it on componentWillUnmount. The latter never triggers on the server side, leaving you with a memory leak. The workaround is to only attach handlers in componentDidMount (and by its nature, only on the client side).
 
 - we treat the registration of reducers as an idempotent operation on the redux store
-- we leverage the fact that initialization / `componentWillMount` hooks _do_ run on `renderToString` to register our local reducers onto the redux store
-
+- we leverage the fact that initialization / `componentWillMount` hooks _do_ run on `renderToString` to register our local reducers onto the redux store. thus, we do a throwaway `renderToString` on the app with the redux store in its context.
 - after that, we dispatch whatever actions we need to as usual
 - we need to strip out the reducers from the redux store's state before stringifying it, to that effect we run it through `stringifySafe`
 - on the client side, on first render, the reducers get registered again at the correct positions, while picking up initial state from the redux store
