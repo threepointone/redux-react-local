@@ -1,19 +1,4 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-
-const has = {}.hasOwnProperty
-
-function omit(obj, key) {
-  if (!obj::has(key)) {
-    return obj
-  }
-  return Object.keys(obj).reduce((o, k) =>
-    k === key ?
-      o :
-      (o[k] = obj[k], o),
-    {})
-}
-
+import React, { PropTypes, Component } from 'react'
 
 export default function local({
   ident,            // string / ƒ(props)
@@ -45,21 +30,25 @@ export default function local({
 
   return function (Target) {
 
-    return @connect((state, props) => {
-      if (!state.local) {
-        throw new Error('did you forget to add the `local` reducer?')
+    return class ReduxReactLocal extends Component {
+      static contextTypes = {
+        store: PropTypes.shape({
+          subscribe: PropTypes.func.isRequired,
+          dispatch: PropTypes.func.isRequired,
+          getState: PropTypes.func.isRequired
+        })
       }
-      return {
-        $$local: state.local[getId(props)]
-      }
-    })
-    class ReduxReactLocal extends Component {
       static displayName = 'local:' + (Target.displayName || Target.name);
 
-      state = {
-        id: getId(this.props),
-        value: this.props.$$local !== undefined ? this.props.$$local : getInitial(this.props)
-      };
+      state = (() => {
+        let id = getId(this.props),
+          state = this.context.store.getState().local[id],
+          init = state !== undefined ? state : getInitial(this.props)
+        return {
+          id,
+          value: init
+        }
+      })()
 
       $ = action => {
         // 'localize' an event. super convenient for making actions 'local' to this component
@@ -76,13 +65,13 @@ export default function local({
       };
 
       _setState = state => {
-        this.props.dispatch({ type: '$$local.setState', payload: { state, ident: this.state.id } })
+        this.context.store.dispatch({ type: '$$local.setState', payload: { state, ident: this.state.id } })
         this.setState({ value: state })
       };
 
       componentWillMount() {
 
-        this.props.dispatch({
+        this.context.store.dispatch({
           type: '$$local.register',
           payload: {
             ident: this.state.id,
@@ -92,13 +81,20 @@ export default function local({
           }
         })
       }
+      componentDidMount() {
+        this.dispose = this.context.store.subscribe(() =>{
+          this.setState({
+            value: this.context.store.getState().local[this.state.id]
+          })
+        })
+      }
 
       componentWillReceiveProps(next) {
         let id = getId(next)
 
         if (id !== this.state.id) {
           let init = getInitial(next)
-          this.props.dispatch({
+          this.context.store.dispatch({
             type: '$$local.swap',
             payload: {
               ident: this.state.id,
@@ -108,30 +104,31 @@ export default function local({
               persist
             }
           })
-          this.setState({ id, value: next.$$local !== undefined ? next.$$local : init })
+          let state = this.context.store.getState().local[id]
+          this.setState({ id, value: state !== undefined ? state : init })
         }
-        else {
-          this.setState({ value: next.$$local })
-        }
-
       }
 
       componentWillUnmount() {
-        this.props.dispatch({
+        this.context.store.dispatch({
           type: '$$local.unmount',
           payload: {
             ident: this.state.id,
             persist
           }
         })
+        if(this.dispose) {
+          this.dispose()
+        }
+
       }
 
       render() {
         return <Target
-          {...omit(this.props, '$$local')}
+          {...this.props}
           $={this.$}
           ident={this.state.id}
-          dispatch={this.props.dispatch}
+          dispatch={this.context.store.dispatch}
           state={this.state.value}
           setState={this._setState}>
             {this.props.children}
