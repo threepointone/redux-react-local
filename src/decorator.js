@@ -4,6 +4,8 @@ function whenUndefined(o, orElse) {
   return o === undefined ? orElse : o
 }
 
+const isBrowserLike = typeof navigator !== 'undefined'
+
 const has = {}.hasOwnProperty
 
 // modified from gaearon/react-pure-render
@@ -109,8 +111,7 @@ export default function local({
           }
         })
 
-        // MEMORY LEAK ON SERVER SIDE
-        if(typeof window !== undefined) {
+        if(isBrowserLike) {
           this.dispose = this.store.subscribe(() =>{
             this.setState({
               value: this.store.getState().local[this.state.id]
