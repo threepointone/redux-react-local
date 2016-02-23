@@ -12,15 +12,9 @@ import expect from 'expect'
 import expectJSX from 'expect-jsx'
 expect.extend(expectJSX)
 
-// perf
-// import { batchedSubscribe } from 'redux-batched-subscribe'
-// import { unstable_batchedUpdates } from 'react-dom'
-
-
 class LocalRoot extends Component {
   store = createStore(
     combineReducers({ local: reducer })
-    // ,batchedSubscribe(unstable_batchedUpdates)
   )
   render() {
     return (<Provider store={this.store}>
