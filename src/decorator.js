@@ -81,6 +81,7 @@ export default function local({
           }
         })
 
+        // MEMORY LEAK ON SERVER SIDE
         this.dispose = this.context.store.subscribe(() =>{
           this.setState({
             value: this.context.store.getState().local[this.state.id]
