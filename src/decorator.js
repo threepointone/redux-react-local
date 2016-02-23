@@ -141,7 +141,7 @@ export default function local({
               persist
             }
           })
-          this.setState({ id })
+          this.setState({ id, value: whenUndefined(this.store.getState().local[id], init) })
         }
       }
 
@@ -164,7 +164,7 @@ export default function local({
           $={this.$}
           ident={this.state.id}
           dispatch={this.store.dispatch}
-          state={this.store.getState().local[this.state.id]}
+          state={this.state.value}
           setState={this._setState}>
             {this.props.children}
         </Target>
