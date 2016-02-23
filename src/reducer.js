@@ -44,7 +44,7 @@ function register(state, action) {
 
   if (fn && fn !== identity && fn !== reducer) {
     // todo - throw, but not when hot reloading
-    console.warn(`${ident} already exists, swapping anyway`) // eslint-disable-line no-console
+    throw new Error(`local key ${ident} already exists`)
   }
 
   return {

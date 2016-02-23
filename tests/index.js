@@ -177,6 +177,29 @@ describe('redux-react-local', () => {
     expect(node.innerText).toEqual('zzz')
   })
 
+  it('should throw when you have 2 different components with the sme ident', () => {
+    @local({ ident: 'app' })
+    class App1 extends Component {
+      render() {
+        return null
+      }
+    }
+
+    @local({ ident: 'app' })
+    class App2 extends Component {
+      render() {
+        return null
+      }
+    }
+
+    expect(() => render(<LocalRoot>
+      <div>
+        <App1 />
+        <App2 />
+      </div>
+    </LocalRoot>, node)).toThrow()
+  })
+
   // state
   it('can have an initial state', () => {
     @local({
