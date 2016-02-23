@@ -25,11 +25,19 @@ class Mouse extends Component{
 
 @connect(state => state.local.mouse)
 class App extends Component{
+  state = {
+    tracking: false
+  }
+  onClick = () => {
+    this.setState({tracking: !this.state.tracking})
+  }
   render(){
     let {pageX, pageY} = this.props;
-    return <div>
-      <Mouse/>
+    return <div onClick={this.onClick}>
+      {this.state.tracking ? <Mouse/> : null}
       x: {pageX}, y: {pageY}
+      <br/>
+      the above persists even when not tracking. magic!
     </div>
   }
 }
