@@ -36,7 +36,7 @@ function setState(state, { payload }) {
 
 function register(state, action) {
   let { payload: { ident, initial, reducer } } = action,
-    fn = state.$$fns[ident]
+    fn = (state.$$fns || {})[ident]
 
   if (ident === '$$fns') {
     throw new Error('cannot have an ident named `$$fns`, sorry!')
@@ -53,7 +53,7 @@ function register(state, action) {
     // this way we can 'persist' across unmounts
     // also makes preloading data simple
     $$fns : {
-      ...state.$$fns,
+      ...state.$$fns || {},
       [ident]: reducer
     }
   }
@@ -76,7 +76,7 @@ function unmount(state, action) {
     return {
       ...state,
       $$fns: {
-        ...state.$$fns,
+        ...state.$$fns || {},
         [ident]: identity // we use this as a signal that it's been unmounted
       }
     }
@@ -84,7 +84,7 @@ function unmount(state, action) {
   else {
     return {
       ...omit(state, ident),
-      $$fns: omit(state.$$fns, ident)
+      $$fns: omit(state.$$fns || {}, ident)
     }
   }
 }
@@ -92,7 +92,7 @@ function unmount(state, action) {
 function reduceAll(state, action) {
   // update all local keys
   let { meta: { ident, local } = {} } = action,
-    { $$fns } = state,
+    { $$fns = {} } = state,
     o = { $$fns },
     changed = false
 
