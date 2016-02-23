@@ -74,10 +74,15 @@ export default function local({
       store = this.context.store
 
       state = (() => {
-        let id = getId(this.props)
+        let id = getId(this.props),
+          storeState = this.store.getState()
+
+        if(!storeState.local) {
+          throw new Error('did you forget to include the `local` reducer?')
+        }
         return {
           id,
-          value: whenUndefined(this.store.getState().local[id], getInitial(this.props))
+          value: whenUndefined(storeState.local[id], getInitial(this.props))
         }
       })()
 
