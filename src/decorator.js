@@ -146,7 +146,11 @@ export default function local({
               persist
             }
           })
-          this.setState({ id, value: whenUndefined(this.store.getState().local[id], init) })
+
+          this.setState({
+            id,
+            value: whenUndefined(this.store.getState().local[id], init)
+          })
         }
       }
 
