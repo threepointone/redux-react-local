@@ -113,9 +113,10 @@ export default function local({
 
         if(isBrowserLike) {
           this.dispose = this.store.subscribe(() =>{
-            this.setState({
-              value: this.store.getState().local[this.state.id]
-            })
+            let value = this.store.getState().local[this.state.id]
+            if(value != this.state.value) {
+              this.setState({ value })
+            }
           })
         }
       }
