@@ -1,5 +1,34 @@
 import React, { PropTypes, Component } from 'react'
 
+function whenUndefined(o, orElse) {
+  return o === undefined ? orElse : o
+}
+
+const has = {}.hasOwnProperty
+
+// modified from gaearon/react-pure-render
+function shallowEqual(objA, objB) {
+  if (objA === objB) {
+    return true
+  }
+
+  const keysA = Object.keys(objA)
+  const keysB = Object.keys(objB)
+
+  if (keysA.length !== keysB.length) {
+    return false
+  }
+
+  // Test for A's keys different from B.
+  for (let i = 0; i < keysA.length; i++) {
+    if (!objB::has(keysA[i]) || objA[keysA[i]] !== objB[keysA[i]]) {
+      return false
+    }
+  }
+
+  return true
+}
+
 export default function local({
   ident,            // string / ƒ(props)
   initial = {},     // value / ƒ(props)
@@ -40,13 +69,13 @@ export default function local({
       }
       static displayName = 'local:' + (Target.displayName || Target.name);
 
+      store = this.context.store
+
       state = (() => {
-        let id = getId(this.props),
-          state = this.context.store.getState().local[id],
-          init = state !== undefined ? state : getInitial(this.props)
+        let id = getId(this.props)
         return {
           id,
-          value: init
+          value: whenUndefined(this.store.getState().local[id], getInitial(this.props))
         }
       })()
 
@@ -65,13 +94,12 @@ export default function local({
       };
 
       _setState = state => {
-        this.context.store.dispatch({ type: '$$local.setState', payload: { state, ident: this.state.id } })
-        this.setState({ value: state })
+        this.store.dispatch({ type: '$$local.setState', payload: { state, ident: this.state.id } })
       };
 
       componentWillMount() {
 
-        this.context.store.dispatch({
+        this.store.dispatch({
           type: '$$local.register',
           payload: {
             ident: this.state.id,
@@ -82,11 +110,18 @@ export default function local({
         })
 
         // MEMORY LEAK ON SERVER SIDE
-        this.dispose = this.context.store.subscribe(() =>{
-          this.setState({
-            value: this.context.store.getState().local[this.state.id]
+        if(typeof window !== undefined) {
+          this.dispose = this.store.subscribe(() =>{
+            this.setState({
+              value: this.store.getState().local[this.state.id]
+            })
           })
-        })
+        }
+      }
+      shouldComponentUpdate(nextProps, nextState) {
+        return !shallowEqual(this.props, nextProps) ||
+          (this.state.id !== nextState.id) ||
+          (this.state.value !== nextState.value)
       }
 
       componentWillReceiveProps(next) {
@@ -94,7 +129,7 @@ export default function local({
 
         if (id !== this.state.id) {
           let init = getInitial(next)
-          this.context.store.dispatch({
+          this.store.dispatch({
             type: '$$local.swap',
             payload: {
               ident: this.state.id,
@@ -104,13 +139,12 @@ export default function local({
               persist
             }
           })
-          let state = this.context.store.getState().local[id]
-          this.setState({ id, value: state !== undefined ? state : init })
+          this.setState({ id })
         }
       }
 
       componentWillUnmount() {
-        this.context.store.dispatch({
+        this.store.dispatch({
           type: '$$local.unmount',
           payload: {
             ident: this.state.id,
@@ -120,7 +154,6 @@ export default function local({
         if(this.dispose) {
           this.dispose()
         }
-
       }
 
       render() {
@@ -128,8 +161,8 @@ export default function local({
           {...this.props}
           $={this.$}
           ident={this.state.id}
-          dispatch={this.context.store.dispatch}
-          state={this.state.value}
+          dispatch={this.store.dispatch}
+          state={this.store.getState().local[this.state.id]}
           setState={this._setState}>
             {this.props.children}
         </Target>
