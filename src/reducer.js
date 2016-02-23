@@ -43,7 +43,6 @@ function register(state, action) {
   }
 
   if (fn && fn !== identity && fn !== reducer) {
-    // todo - throw, but not when hot reloading
     throw new Error(`local key ${ident} already exists`)
   }
 

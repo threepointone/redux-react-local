@@ -69,7 +69,7 @@ export default function local({
           getState: PropTypes.func.isRequired
         })
       }
-      static displayName = 'local:' + (Target.displayName || Target.name);
+      static displayName = 'local:' + (Target.displayName || Target.name)
 
       store = this.context.store
 
@@ -98,11 +98,11 @@ export default function local({
             local: true
           }
         }
-      };
+      }
 
       _setState = state => {
         this.store.dispatch({ type: '$$local.setState', payload: { state, ident: this.state.id } })
-      };
+      }
 
       componentWillMount() {
 
