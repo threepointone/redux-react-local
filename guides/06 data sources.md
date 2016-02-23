@@ -32,12 +32,18 @@ class App extends Component{
     this.setState({tracking: !this.state.tracking})
   }
   render(){
-    let {pageX, pageY} = this.props;
+    let {pageX, pageY} = this.props
     return <div onClick={this.onClick}>
+
       {this.state.tracking ? <Mouse/> : null}
+
       x: {pageX}, y: {pageY}
       <br/>
-      the above persists even when not tracking. magic!
+
+      ps -  because `persist` defaults to `true`,
+      the above stays even when not tracking.
+      magic!
+
     </div>
   }
 }
