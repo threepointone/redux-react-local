@@ -2,7 +2,7 @@ import React, { PropTypes, Component } from 'react'
 import { render } from 'react-dom'
 import { local } from '../src'
 import Root from './root'
-import { cps, call } from 'redux-saga/effects'
+import { cps } from 'redux-saga/effects'
 import { Saga } from 'react-redux-saga'
 
 import styles from './stress.css'
@@ -23,7 +23,7 @@ class Cell extends Component {
   *saga(_, { period, setState }) {
     while (true) {  //eslint-disable-line no-constant-condition
       yield cps(sleep, period)
-      yield call(setState, Math.random())
+      setState(Math.random())
     }
   }
   render() {
@@ -44,7 +44,7 @@ function times(n, fn) {
 class App extends Component {
   render() {
     return <div onClick={this.onClick}>
-      {times(1000, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
+      {times(1200, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
     </div>
   }
 }

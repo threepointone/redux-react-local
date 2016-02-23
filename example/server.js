@@ -2,12 +2,9 @@ import React, { Component } from 'react'
 import { renderToString } from 'react-dom/server'
 import { createStore, combineReducers } from 'redux'
 import { Provider } from 'react-redux'
-import { local, reducer } from '../src'
-
-import {
+import { local, reducer,
   // transforms redux state atom into one that can be JSON.stringify'ed
-  stringifySafe
-} from '../src/server'
+  stringifySafe } from '../src'
 
 
 @local({

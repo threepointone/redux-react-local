@@ -1,5 +1,7 @@
+const has = {}.hasOwnProperty
+
 export function stringifySafe(state) {
-  if(!state.hasOwnProperty('local')) {
+  if(!state::has('local')) {
     return state
   }
 
