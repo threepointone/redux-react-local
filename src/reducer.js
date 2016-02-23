@@ -92,7 +92,7 @@ function reduceAll(state, action) {
   // update all local keys
   let { meta: { ident, local } = {} } = action,
     { $$fns = {} } = state,
-    o = { $$fns },
+    reduced = { $$fns },
     changed = false
 
   Object.keys(state).forEach(key => {
@@ -115,7 +115,7 @@ function reduceAll(state, action) {
     if (computed !== state[key]) {
       changed = true
     }
-    o[key] = computed
+    reduced[key] = computed
   })
 
 
@@ -124,5 +124,5 @@ function reduceAll(state, action) {
     return state
   }
 
-  return o
+  return reduced
 }
