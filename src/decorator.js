@@ -80,8 +80,7 @@ export default function local({
             persist
           }
         })
-      }
-      componentDidMount() {
+
         this.dispose = this.context.store.subscribe(() =>{
           this.setState({
             value: this.context.store.getState().local[this.state.id]
