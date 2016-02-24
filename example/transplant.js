@@ -23,7 +23,7 @@ class Counter extends Component {
 class Debug extends Component {
   render() {
     return <div>
-      debugging: {this.props.counter}
+      debugging: {this.props.get('counter')}
     </div>
   }
 }
