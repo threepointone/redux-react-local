@@ -19,8 +19,25 @@ import Local, { reducer } from '../src'
 import ensureFSA from './ensure-fsa'
 
 // perf
+import raf from 'raf'
 import { batchedSubscribe } from 'redux-batched-subscribe'
 import { unstable_batchedUpdates } from 'react-dom'
+
+// via https://gist.github.com/peteruithoven/9a9363e064ee8bdf28ae
+let rafID
+let notifyFunc
+function animFrame() {
+  if (notifyFunc) {
+    unstable_batchedUpdates(notifyFunc)
+    notifyFunc = null
+  }
+  rafID = raf(animFrame)
+}
+
+function rafUpdateBatcher(notify) {
+  if (rafID === undefined) rafID = raf(animFrame)
+  notifyFunc = notify
+}
 
 export function makeStore(reducers = {}, initial = {}, middleware = []) {
   let sagaMiddleware = createSagaMiddleware()
@@ -44,7 +61,7 @@ export function makeStore(reducers = {}, initial = {}, middleware = []) {
           yield ensureFSA
         }
       }())),
-      batchedSubscribe(unstable_batchedUpdates))
+      batchedSubscribe(rafUpdateBatcher))
   )
 
   store.sagas = sagaMiddleware

@@ -21,7 +21,7 @@ import doHash from './hash'
 function memoizeHasher(fn) {
   let cache = new Map()
   return (level, key) => {
-    let lk = level + key
+    let lk = `${level}${key}`
     if(cache.has(lk)) {
       return cache.get(lk)
     }
