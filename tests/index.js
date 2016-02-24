@@ -389,6 +389,12 @@ describe('redux-react-local', () => {
 
   })
 
+  describe('tree', () => {
+    it('makes immutable copies')
+    it('has log n writes')
+    it('has log n reads')
+  })
+
 
 })
 

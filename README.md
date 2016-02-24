@@ -37,7 +37,7 @@ class App extends React.Component {
 }
 ```
 
-reducer
+getting started
 ---
 
 Add the supplied reducer to a key `local` on your redux store.
@@ -47,6 +47,17 @@ combineReducers({
   // your other reducers
   local: reducer
 })
+// ...
+```
+
+and wrap your app with the `Root` component
+```jsx
+// ...
+<Provider store={store}>
+  <Root>
+    <App/>
+  </Root>
+</Provider>
 // ...
 ```
 
@@ -231,7 +242,7 @@ This saga 'lives' while it's in the tree, and gets cancelled when it unmounts.
 
 This gives us our own little 'event loop'/'process' for the component, with all the other goodies from redux-saga. Nice! See the [mousetracking example](https://github.com/threepointone/redux-react-local/blob/master/example/mousetrack.js) for usage.
 
-(A previous version of this had a `*saga` definition directly in the `@local` annotation, but this new method gives finer control of the input to the saga, and decouples it from the library. I plan on releasing this as a separate module soon.)
+(A previous version of this had a `*saga` definition directly in the `@local` annotation, but this new method gives finer control of the input to the saga, and decouples it from this library.)
 
 
 footnotes

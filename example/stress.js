@@ -20,8 +20,8 @@ class Cell extends Component {
     period: PropTypes.number.isRequired
   };
   componentDidMount() {
-    // setInterval(() => this.props.dispatch(this.props.$({ type: 'tick' })), this.props.period)
-    setInterval(() => this.props.setState(Math.random()), this.props.period)
+    setInterval(() => this.props.dispatch(this.props.$({ type: 'tick' })), this.props.period)
+    // setInterval(() => this.props.setState(Math.random()), this.props.period)
   }
   render() {
     return <div className={styles.cell} style={{ opacity: this.props.state }}>
@@ -41,7 +41,7 @@ function times(n, fn) {
 class App extends Component {
   render() {
     return <div onClick={this.onClick}>
-      {times(100, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
+      {times(3000, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
     </div>
   }
 }
