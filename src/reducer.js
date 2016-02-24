@@ -83,7 +83,7 @@ function reduceAll(state, action) {
   let { meta: { ident, local } = {} } = action,
     { $$fns = {} } = state, changed
 
-  let $$reduced = Object.keys(state.$$index).reduce((o, key) => {
+  Object.keys(state.$$index).forEach(key => {
     let $action = action
     // if this originated from the same key, then add me: true
     if (key === ident && local) {
@@ -100,13 +100,14 @@ function reduceAll(state, action) {
       changed[key] = true
 
     }
-    o[key] = computed
-    return o
-  }, {})
+    state.$$index[key] = computed
+    // o[key] = computed
+    // return o
+  })
 
   return changed ? {
     ...state,
-    $$index: $$reduced,
+    $$index: state.$$index,
     $$changed: { ...state.$$changed, ...changed }
   } : state
 }
