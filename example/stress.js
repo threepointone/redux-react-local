@@ -34,7 +34,7 @@ function times(n, fn) {
 class App extends Component {
   render() {
     return <div onClick={this.onClick}>
-      {times(1000, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
+      {times(3000, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
     </div>
   }
 }

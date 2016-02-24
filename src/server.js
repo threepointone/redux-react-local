@@ -9,8 +9,8 @@ export function stringifySafe(state) {
     ...state,
     local: {
       ...state.local,
-      $$changed: {},
-      $$fns: {}
+      $$changed: undefined,
+      $$fns: undefined
     }
   }
 }

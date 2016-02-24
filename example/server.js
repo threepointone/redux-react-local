@@ -6,6 +6,8 @@ import { local, reducer,
   // transforms redux state atom into one that can be JSON.stringify'ed
   stringifySafe } from '../src'
 
+import * as T from '../src/tree'
+
 
 @local({
   ident: 'counter',
@@ -34,11 +36,15 @@ let store = createStore(combineReducers({
 renderToString(<Provider store={store}>
   <Counter/>
 </Provider>)
-
 // dispatch some actions
 store.dispatch({ type: 'increment' })
 store.dispatch({ type: 'increment' })
 store.dispatch({ type: 'increment' })
+
+
+console.log(  // eslint-disable-line no-console
+  'state', T.toObject(store.getState().local.$$tree))
+
 
 // actually render to final html
 console.log(  // eslint-disable-line no-console
@@ -61,4 +67,3 @@ console.log(  // eslint-disable-line no-console
 // render(<Provider store={createStore(combineReducers({ local: reducer }), serialized)}>
 //   <Counter/>
 // </Provider>, element)
-

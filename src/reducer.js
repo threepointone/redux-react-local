@@ -1,21 +1,36 @@
 const identity = x => x
+import * as T from './tree'
 
 function get(key) {
-  return this.$$index[key]
+  return T.get(this.$$tree, key)
 }
 
 // too - .get when initialState is passed
 export default function localReducer(state = {
-  $$index: {},
-  $$changed: {}
+  $$tree: T.make(),
+  $$fns: T.make(),
+  $$changed: T.make()
 }, action) {
+  // ack!
   state.get = state.get || get
+  state.$$tree = state.$$tree || T.make()
+  state.$$fns = state.$$fns || T.make()
+  state.$$changed = state.$$changed || T.make()
+
   switch (action.type) {
+    case '$$local.flushed': return flush(state, action)
     case '$$local.setState': return setState(state, action)
     case '$$local.register': return register(state, action)
     case '$$local.swap': return swap(state, action)
     case '$$local.unmount': return unmount(state, action)
     default: return reduceAll(state, action)
+  }
+}
+
+function flush(state) {
+  return {
+    ...state,
+    $$changed: T.make()
   }
 }
 
@@ -26,26 +41,26 @@ function setState(state, { payload }) {
 
   return {
     ...state,
-    $$index: (state.$$index[payload.ident] = payload.state, state.$$index),
-    $$changed: (state.$$changed[payload.ident] = true, state.$$changed)
+    $$tree: T.set(state.$$tree, payload.ident, payload.state),
+    $$changed: T.set(state.$$changed, payload.ident, true)
   }
 }
 
 function register(state, action) {
   let { payload: { ident, initial, reducer } } = action,
-    fn = (state.$$fns || {})[ident]
+    fn = T.get(state.$$fns, ident)
 
   if (fn && fn !== identity && fn !== reducer) {
     throw new Error(`local key ${ident} already exists`)
   }
   // this way we can 'persist' across unmounts
   // also makes preloading data simple
-  let $$fns = state.$$fns || {}
+  let prevState = T.get(state.$$tree, ident)
   return {
     ...state,
-    $$index: (state.$$index[ident] = state.$$index[ident] !== undefined ? state.$$index[ident] : initial, state.$$index),
-    $$fns: ($$fns[ident] = reducer, $$fns),
-    $$changed: (state.$$changed[ident] = true, state.$$changed)
+    $$tree: prevState ? state.$$tree : T.set(state.$$tree, ident, initial),
+    $$fns: T.set(state.$$fns, ident, reducer),
+    $$changed: T.set(state.$$changed, ident,  true)
   }
 }
 
@@ -62,18 +77,17 @@ function swap(state, action) {
 
 function unmount(state, action) {
   let { payload: { persist, ident } } = action
-  let $$fns = state.$$fns || {}
   if (persist) {
     return {
       ...state,
-      $$fns: ($$fns[ident] = identity, $$fns) // we use this as a signal that it's been unmounted
+      $$fns: T.set(state.$$fns, ident, identity) // we use this as a signal that it's been unmounted
     }
   }
   else {
     return {
       ...state,
-      $$index: (delete state.$$index[ident], state.$$index),
-      $$fns: (delete state.$$fns[ident], state.$$fns)
+      $$tree: T.del(state.$$tree, ident),
+      $$fns: T.del(state.$$fns, ident)
     }
   }
 }
@@ -81,9 +95,9 @@ function unmount(state, action) {
 function reduceAll(state, action) {
   // update all local keys
   let { meta: { ident, local } = {} } = action,
-    { $$fns = {} } = state, changed
+    { $$fns } = state, changed = []
 
-  Object.keys(state.$$index).forEach(key => {
+  let t = T.map(state.$$tree, (val, key) => {
     let $action = action
     // if this originated from the same key, then add me: true
     if (key === ident && local) {
@@ -91,23 +105,22 @@ function reduceAll(state, action) {
     }
 
     // reduce
-    let computed = ($$fns[key] || identity)(state.$$index[key], $action)
+    let computed = (T.get($$fns, key) || identity)(val, $action)
+
     if (computed === undefined) {
       throw new Error(`did you forget to return state from the ${key} reducer?`) // eslint-disable-line no-console
     }
-    if(computed !== state.$$index[key]) {
-      changed = changed || {}
-      changed[key] = true
-
+    if(computed !== val) {
+      changed.push(key)
+      // changed = T.set(changed, key, true)
     }
-    state.$$index[key] = computed
-    // o[key] = computed
-    // return o
+
+    return computed
   })
 
-  return changed ? {
+  return changed.length > 0 ? {
     ...state,
-    $$index: state.$$index,
-    $$changed: { ...state.$$changed, ...changed }
+    $$tree: t,
+    $$changed: changed.reduce((c, key) => T.set(c, key, true), state.$$changed)
   } : state
 }

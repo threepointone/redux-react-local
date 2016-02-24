@@ -3,6 +3,8 @@
 import React, { Component, PropTypes } from 'react'
 import { render, unmountComponentAtNode } from 'react-dom'
 
+import * as T from '../src/tree'
+
 import { createStore, combineReducers } from 'redux'
 import { connect, Provider } from 'react-redux'
 
@@ -99,7 +101,8 @@ describe('redux-react-local', () => {
             this.setState({ faux: 2 }, () =>
               this.setState({ faux: 3 }, () =>
                 this.setState({ faux: 2 }, () => {
-                  expect(this.props.local.$$index).toEqual({
+                  let o = T.toObject(this.props.local.$$tree)
+                  expect(o).toEqual({
                     // these 3 persisted
                     'faux:1': 2,
                     'faux:2': 4,  // and this one incremented twice
@@ -389,15 +392,15 @@ describe('redux-react-local', () => {
 
 })
 
-const has = {}.hasOwnProperty
+// const has = {}.hasOwnProperty
 
-function omit(obj, key) {
-  if (!obj::has(key)) {
-    return obj
-  }
-  return Object.keys(obj).reduce((o, k) =>
-    k === key ?
-      o :
-      (o[k] = obj[k], o),
-    {})
-}
+// function omit(obj, key) {
+//   if (!obj::has(key)) {
+//     return obj
+//   }
+//   return Object.keys(obj).reduce((o, k) =>
+//     k === key ?
+//       o :
+//       (o[k] = obj[k], o),
+//     {})
+// }
