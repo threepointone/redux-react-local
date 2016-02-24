@@ -35,8 +35,13 @@ const getHash = memoizeHasher((level = 0, key) => {
   return doHash(`${level}:${key}`, 5381)%32 + ''
 })
 
-
+const make0 = {
+  level: 0, hashes: {}
+}
 export function make(level = 0) {
+  if(level === 0) {
+    return make0
+  }
   return {
     level, hashes: {}
   }
@@ -60,11 +65,15 @@ export function set(tree, key, value) {
     }
   }
   else if(isTree(hashes[hash])) {
+    let afterSet = set(hashes[hash], key, value)
+    if(afterSet === hashes[hash]) {
+      return tree
+    }
     return {
       ...tree,
       hashes: {
         ...hashes,
-        [hash]: set(hashes[hash], key, value)
+        [hash]: afterSet
       }
     }
   }

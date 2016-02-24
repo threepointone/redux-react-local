@@ -1,3 +1,4 @@
+
 import React, { PropTypes, Component } from 'react'
 import { render } from 'react-dom'
 import { local } from '../src'
@@ -18,15 +19,20 @@ import styles from './stress.css'
 class Cell extends Component {
   static propTypes = {
     period: PropTypes.number.isRequired
-  };
+  }
+  state = {
+    value: 0
+  }
   componentDidMount() {
-    setInterval(() => this.props.dispatch(this.props.$({ type: 'tick' })), this.props.period)
-    // setInterval(() => this.props.setState(Math.random()), this.props.period)
+    // setInterval(() => this.props.dispatch(this.props.$({ type: 'tick' })), this.props.period)
+    setInterval(() => this.props.setState(Math.random()), this.props.period)
+    // setInterval(() => this.setState({ value: Math.random() }), this.props.period)
   }
   render() {
-    return <div className={styles.cell} style={{ opacity: this.props.state }}>
+    return <div className={styles.cell} style={{ opacity: this.props.state }}/>
+    // return <div className={styles.cell} style={{ opacity: this.state.value }}/>
 
-    </div>
+
   }
 }
 
@@ -41,11 +47,10 @@ function times(n, fn) {
 class App extends Component {
   render() {
     return <div onClick={this.onClick}>
-      {times(3000, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
+      {times(6000, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
     </div>
   }
 }
 
 
 render(<Root><App /></Root>, document.getElementById('app'))
-

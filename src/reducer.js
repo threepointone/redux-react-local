@@ -42,7 +42,7 @@ function setState(state, { payload }) {
   return {
     ...state,
     $$tree: T.set(state.$$tree, payload.ident, payload.state),
-    $$changed: T.set(state.$$changed, payload.ident, true)
+    $$changed: T.set(state.$$changed, payload.ident, payload.state)
   }
 }
 
@@ -58,9 +58,9 @@ function register(state, action) {
   let prevState = T.get(state.$$tree, ident)
   return {
     ...state,
-    $$tree: prevState ? state.$$tree : T.set(state.$$tree, ident, initial),
-    $$fns: T.set(state.$$fns, ident, reducer),
-    $$changed: T.set(state.$$changed, ident,  true)
+    $$tree: prevState !== undefined ? state.$$tree : T.set(state.$$tree, ident, initial),
+    $$fns: fn === reducer ? state.$$fns : T.set(state.$$fns, ident, reducer),
+    $$changed: T.set(state.$$changed, ident,  prevState !== undefined ? prevState : initial)
   }
 }
 
@@ -114,7 +114,8 @@ function reduceAll(state, action) {
     reducers = fnToOb($$fns)
 
   let t = state.$$tree, entries = T.entries(state.$$tree)
-  entries.forEach(([ key, value ]) => {
+  for(let i = 0; i< entries.length; i++) {
+    let [ key, value ] = entries[i]
     let $action = action
     // if this originated from the same key, then add me: true
     if (key === ident && local) {
@@ -130,13 +131,14 @@ function reduceAll(state, action) {
 
     if(computed !== value) {
       t = T.set(t, key, computed)
-      changed.push(key)
+      changed.push([ key, computed ])
     }
-  })
+  }
+
 
   return changed.length > 0 ? {
     ...state,
     $$tree: t,
-    $$changed: changed.reduce((c, key) => T.set(c, key, true), state.$$changed)
+    $$changed: changed.reduce((c, [ key, value ]) => T.set(c, key, value), state.$$changed)
   } : state
 }

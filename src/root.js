@@ -26,10 +26,9 @@ export default class Root extends Component {
     if(isBrowserLike) {
       this.dispose = this.context.store.subscribe(() => {
         let state = this.context.store.getState().local, changed = false
-        T.entries(state.$$changed).forEach(([ key ]) => {
-          changed = true
-          let val = state.get(key);
-          (this.fns[key] || []).forEach(fn => fn(val))
+        T.entries(state.$$changed).forEach(([ key, value ]) => {
+          changed = true;
+          (this.fns[key] || []).forEach(fn => fn(value))
         })
         if(changed) {
           this.context.store.dispatch({ type: '$$local.flushed' })
