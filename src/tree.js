@@ -18,10 +18,23 @@ function omit(obj, key) {
 
 import doHash from './hash'
 
-function getHash(level = 0, key) {
+function memoizeHasher(fn) {
+  let cache = new Map()
+  return (level, key) => {
+    let lk = level + key
+    if(cache.has(lk)) {
+      return cache.get(lk)
+    }
+    cache.set(lk, fn(level, key))
+    return cache.get(lk)
+  }
+}
+
+const getHash = memoizeHasher((level = 0, key) => {
   // generate a number between 0 - 31
   return doHash(`${level}:${key}`, 5381)%32 + ''
-}
+})
+
 
 export function make(level = 0) {
   return {
@@ -124,34 +137,48 @@ export function del(tree, key) {
   }
 }
 
-export function *entries(tree) {
-  let hashes = tree.hashes
-  for(let key of Object.keys(hashes)) {
-    if(!isTree(hashes[key])) {
-      yield [ hashes[key].key, hashes[key].value ]
+function memoizeEntries(fn) {
+  let cache = new WeakMap()
+  return (o) => {
+
+    if(cache.has(o)) {
+      return cache.get(o)
     }
-    else{
-      yield* entries(hashes[key])
-    }
+    cache.set(o, fn(o))
+    return cache.get(o)
   }
 }
 
-// todo - more performant
-export function map(tree, fn) {
-  let mapped = tree
-  for(let [ key, value ] of entries(tree)) {
-    let computed = fn(value, key)
-    if(computed !== value) {
-      mapped = set(mapped, key, computed)
+export const entries = memoizeEntries((tree) => {
+  let arr = []
+  let hashes = tree.hashes
+  Object.keys(hashes).forEach(key => {
+    if(!isTree(hashes[key])) {
+      arr.push([ hashes[key].key, hashes[key].value ])
     }
-  }
-  return mapped
-}
+    else {
+      arr = arr.concat(entries(hashes[key]))
+    }
+  })
+  return arr
+})
+
+// todo - more performant
+// export function map(tree, fn) {
+//   let mapped = tree
+//   entries(tree).forEach(([ key, value ]) => {
+//     let computed = fn(value, key)
+//     if(computed !== value) {
+//       mapped = set(mapped, key, computed)
+//     }
+//   })
+//   return mapped
+// }
 
 export function hasHash(tree, key) {
   return tree.hashes::hasProp(getHash(tree.level, key))
 }
 
 export function toObject(tree) {
-  return [ ...entries(tree) ].reduce((o, [ key, value ]) => (o[key] = value, o), {})
+  return entries(tree).reduce((o, [ key, value ]) => (o[key] = value, o), {})
 }

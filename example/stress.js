@@ -7,13 +7,20 @@ import styles from './stress.css'
 
 @local({
   ident: ({ id }) => `cell:${id}`,
-  initial: () => Math.random() * 100
+  initial: () => Math.random(),
+  reducer(state, { me, meta } = {}) {
+    if(me && meta.type === 'tick') {
+      return Math.random()
+    }
+    return state
+  }
 })
 class Cell extends Component {
   static propTypes = {
     period: PropTypes.number.isRequired
   };
   componentDidMount() {
+    // setInterval(() => this.props.dispatch(this.props.$({ type: 'tick' })), this.props.period)
     setInterval(() => this.props.setState(Math.random()), this.props.period)
   }
   render() {
@@ -34,7 +41,7 @@ function times(n, fn) {
 class App extends Component {
   render() {
     return <div onClick={this.onClick}>
-      {times(3000, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
+      {times(100, i => <Cell period={Math.random() * 10000} id={i} key={i} />)}
     </div>
   }
 }

@@ -25,8 +25,8 @@ export default class Root extends Component {
   componentWillMount() {
     if(isBrowserLike) {
       this.dispose = this.context.store.subscribe(() => {
-        let state = this.context.store.getState().local, changed = false;
-        [ ...T.entries(state.$$changed) ].forEach(([ key ]) => {
+        let state = this.context.store.getState().local, changed = false
+        T.entries(state.$$changed).forEach(([ key ]) => {
           changed = true
           let val = state.get(key);
           (this.fns[key] || []).forEach(fn => fn(val))

@@ -92,12 +92,29 @@ function unmount(state, action) {
   }
 }
 
+function memoizeRsToOb(fn) {
+  let cache = new WeakMap()
+  return (o) => {
+
+    if(cache.has(o)) {
+      return cache.get(o)
+    }
+    cache.set(o, fn(o))
+    return cache.get(o)
+  }
+}
+
+const fnToOb = memoizeRsToOb(T.toObject)
+
+
 function reduceAll(state, action) {
   // update all local keys
   let { meta: { ident, local } = {} } = action,
-    { $$fns } = state, changed = []
+    { $$fns } = state, changed = [],
+    reducers = fnToOb($$fns)
 
-  let t = T.map(state.$$tree, (val, key) => {
+  let t = state.$$tree, entries = T.entries(state.$$tree)
+  entries.forEach(([ key, value ]) => {
     let $action = action
     // if this originated from the same key, then add me: true
     if (key === ident && local) {
@@ -105,17 +122,16 @@ function reduceAll(state, action) {
     }
 
     // reduce
-    let computed = (T.get($$fns, key) || identity)(val, $action)
+    let computed = (reducers[key] || identity)(value, $action)
 
     if (computed === undefined) {
       throw new Error(`did you forget to return state from the ${key} reducer?`) // eslint-disable-line no-console
     }
-    if(computed !== val) {
-      changed.push(key)
-      // changed = T.set(changed, key, true)
-    }
 
-    return computed
+    if(computed !== value) {
+      t = T.set(t, key, computed)
+      changed.push(key)
+    }
   })
 
   return changed.length > 0 ? {
