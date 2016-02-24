@@ -13,7 +13,7 @@ import optimist from 'redux-optimist'
 import { Optimist } from 'react-redux-optimist'
 
 // redux-react-local
-import { reducer } from '../src'
+import Local, { reducer } from '../src'
 
 // fsa
 import ensureFSA from './ensure-fsa'
@@ -65,11 +65,13 @@ export default class Root extends Component {
     makeStore(this.props.reducers, this.props.initial, this.props.middleware)
   render() {
     return <Provider store={this.store}>
-      <Sagas middleware={this.store.sagas}>
-        <Optimist>
-          {this.props.children}
-        </Optimist>
-      </Sagas>
+      <Local.Root>
+        <Sagas middleware={this.store.sagas}>
+          <Optimist>
+            {this.props.children}
+          </Optimist>
+        </Sagas>
+      </Local.Root>
     </Provider>
   }
 }

@@ -8,7 +8,7 @@ module.exports = function (config) {
     },
     preprocessors: {
       '../src/*.js': [ 'coverage' ],
-      './*.js': [ 'webpack' ]
+      './*.js': [ 'webpack', 'sourcemap' ]
     },
     webpack: {
       module: {
@@ -21,7 +21,8 @@ module.exports = function (config) {
           include: require('path').join(__dirname, '../src'),
           loader: 'isparta'
         } ]
-      }
+      },
+      devtool: 'inline-source-map'
     },
     webpackMiddleware: {
       noInfo: true

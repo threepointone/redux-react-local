@@ -6,7 +6,7 @@ import { render, unmountComponentAtNode } from 'react-dom'
 import { createStore, combineReducers } from 'redux'
 import { connect, Provider } from 'react-redux'
 
-import { local, reducer } from '../src'
+import { local, reducer, Root } from '../src'
 
 import expect from 'expect'
 import expectJSX from 'expect-jsx'
@@ -18,7 +18,9 @@ class LocalRoot extends Component {
   )
   render() {
     return (<Provider store={this.store}>
-      {this.props.children}
+      <Root>
+        {this.props.children}
+      </Root>
     </Provider>)
   }
 }
@@ -97,7 +99,7 @@ describe('redux-react-local', () => {
             this.setState({ faux: 2 }, () =>
               this.setState({ faux: 3 }, () =>
                 this.setState({ faux: 2 }, () => {
-                  expect(omit(this.props.local, '$$fns')).toEqual({
+                  expect(this.props.local.$$index).toEqual({
                     // these 3 persisted
                     'faux:1': 2,
                     'faux:2': 4,  // and this one incremented twice
@@ -169,7 +171,7 @@ describe('redux-react-local', () => {
     @connect(x => x)
     class Inner extends Component {
       render() {
-        return <div>{this.props.local.app}</div>
+        return <div>{this.props.local.get('app')}</div>
       }
     }
 

@@ -1,19 +1,15 @@
 const identity = x => x
 
-const has = {}.hasOwnProperty
-
-function omit(obj, key) {
-  if (!obj::has(key)) {
-    return obj
-  }
-  return Object.keys(obj).reduce((o, k) =>
-    k === key ?
-      o :
-      (o[k] = obj[k], o),
-    {})
+function get(key) {
+  return this.$$index[key]
 }
 
-export default function localReducer(state = { $$fns: {} }, action) {
+// too - .get when initialState is passed
+export default function localReducer(state = {
+  $$index: {},
+  $$changed: {}
+}, action) {
+  state.get = state.get || get
   switch (action.type) {
     case '$$local.setState': return setState(state, action)
     case '$$local.register': return register(state, action)
@@ -24,13 +20,14 @@ export default function localReducer(state = { $$fns: {} }, action) {
 }
 
 function setState(state, { payload }) {
-  // todo - test for undefined
   if(payload.state === undefined) {
     throw new Error('cannot set undefined as local state')
   }
+
   return {
     ...state,
-    [payload.ident]: payload.state
+    $$index: (state.$$index[payload.ident] = payload.state, state.$$index),
+    $$changed: (state.$$changed[payload.ident] = true, state.$$changed)
   }
 }
 
@@ -38,23 +35,17 @@ function register(state, action) {
   let { payload: { ident, initial, reducer } } = action,
     fn = (state.$$fns || {})[ident]
 
-  if (ident === '$$fns') {
-    throw new Error('cannot have an ident named `$$fns`, sorry!')
-  }
-
   if (fn && fn !== identity && fn !== reducer) {
     throw new Error(`local key ${ident} already exists`)
   }
-
+  // this way we can 'persist' across unmounts
+  // also makes preloading data simple
+  let $$fns = state.$$fns || {}
   return {
     ...state,
-    [ident] : state[ident] !== undefined ? state[ident] : initial,
-    // this way we can 'persist' across unmounts
-    // also makes preloading data simple
-    $$fns : {
-      ...state.$$fns || {},
-      [ident]: reducer
-    }
+    $$index: (state.$$index[ident] = state.$$index[ident] !== undefined ? state.$$index[ident] : initial, state.$$index),
+    $$fns: ($$fns[ident] = reducer, $$fns),
+    $$changed: (state.$$changed[ident] = true, state.$$changed)
   }
 }
 
@@ -71,19 +62,18 @@ function swap(state, action) {
 
 function unmount(state, action) {
   let { payload: { persist, ident } } = action
+  let $$fns = state.$$fns || {}
   if (persist) {
     return {
       ...state,
-      $$fns: {
-        ...state.$$fns || {},
-        [ident]: identity // we use this as a signal that it's been unmounted
-      }
+      $$fns: ($$fns[ident] = identity, $$fns) // we use this as a signal that it's been unmounted
     }
   }
   else {
     return {
-      ...omit(state, ident),
-      $$fns: omit(state.$$fns || {}, ident)
+      ...state,
+      $$index: (delete state.$$index[ident], state.$$index),
+      $$fns: (delete state.$$fns[ident], state.$$fns)
     }
   }
 }
@@ -91,15 +81,9 @@ function unmount(state, action) {
 function reduceAll(state, action) {
   // update all local keys
   let { meta: { ident, local } = {} } = action,
-    { $$fns = {} } = state,
-    reduced = { $$fns },
-    changed = false
+    { $$fns = {} } = state, changed
 
-  Object.keys(state).forEach(key => {
-    if(key === '$$fns') {
-      return
-    }
-
+  let $$reduced = Object.keys(state.$$index).reduce((o, key) => {
     let $action = action
     // if this originated from the same key, then add me: true
     if (key === ident && local) {
@@ -107,22 +91,22 @@ function reduceAll(state, action) {
     }
 
     // reduce
-    let computed = ($$fns[key] || identity)(state[key], $action)
+    let computed = ($$fns[key] || identity)(state.$$index[key], $action)
     if (computed === undefined) {
-      console.warn(`did you forget to return state from the ${key} reducer?`) // eslint-disable-line no-console
+      throw new Error(`did you forget to return state from the ${key} reducer?`) // eslint-disable-line no-console
     }
+    if(computed !== state.$$index[key]) {
+      changed = changed || {}
+      changed[key] = true
 
-    if (computed !== state[key]) {
-      changed = true
     }
-    reduced[key] = computed
-  })
+    o[key] = computed
+    return o
+  }, {})
 
-
-  if (!changed) {
-    // prevent rerenders if nothing's changed
-    return state
-  }
-
-  return reduced
+  return changed ? {
+    ...state,
+    $$index: $$reduced,
+    $$changed: { ...state.$$changed, ...changed }
+  } : state
 }

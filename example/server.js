@@ -55,6 +55,10 @@ console.log(  // eslint-disable-line no-console
 
 // {"local":{"$$fns":{},"counter":3}}
 
-
 // on the client side, use this json as your redux store's initial state as usual
 // that's it!
+
+// render(<Provider store={createStore(combineReducers({ local: reducer }), serialized)}>
+//   <Counter/>
+// </Provider>, element)
+

@@ -1,10 +1,10 @@
 import React, { PropTypes, Component } from 'react'
 
+const isBrowserLike = typeof navigator !== 'undefined'
+
 function whenUndefined(o, orElse) {
   return o === undefined ? orElse : o
 }
-
-const isBrowserLike = typeof navigator !== 'undefined'
 
 const has = {}.hasOwnProperty
 
@@ -67,7 +67,8 @@ export default function local({
           subscribe: PropTypes.func.isRequired,
           dispatch: PropTypes.func.isRequired,
           getState: PropTypes.func.isRequired
-        })
+        }),
+        $$local: PropTypes.func
       }
       static displayName = 'local:' + (Target.displayName || Target.name)
 
@@ -82,7 +83,7 @@ export default function local({
         }
         return {
           id,
-          value: whenUndefined(storeState.local[id], getInitial(this.props))
+          value: whenUndefined(storeState.local.get(id), getInitial(this.props))
         }
       })()
 
@@ -105,7 +106,6 @@ export default function local({
       }
 
       componentWillMount() {
-
         this.store.dispatch({
           type: '$$local.register',
           payload: {
@@ -115,13 +115,9 @@ export default function local({
             persist
           }
         })
-
         if(isBrowserLike) {
-          this.dispose = this.store.subscribe(() =>{
-            let value = this.store.getState().local[this.state.id]
-            if(value != this.state.value) {
-              this.setState({ value })
-            }
+          this.dispose = this.context.$$local(this.state.id, value => {
+            this.setState({ value })
           })
         }
       }
@@ -149,7 +145,7 @@ export default function local({
 
           this.setState({
             id,
-            value: whenUndefined(this.store.getState().local[id], init)
+            value: whenUndefined(this.store.getState().local.get(id), init)
           })
         }
       }

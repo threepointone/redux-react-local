@@ -7,7 +7,7 @@ import { createStore, combineReducers } from 'redux'
 import { connect, Provider } from 'react-redux'
 
 import { local, reducer } from '../src'
-import { stringifySafe, resolveLocalReducers } from '../src/server'
+import { stringifySafe } from '../src/server'
 
 import expect from 'expect'
 import expectJSX from 'expect-jsx'
