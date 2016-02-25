@@ -1,0 +1,10 @@
+.app{
+  position: relative;
+}
+
+.cell{
+  outline: 1px solid black;
+  position: absolute;
+  width: 10px;
+  height: 10px;
+}

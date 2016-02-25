@@ -2,10 +2,10 @@ const identity = x => x
 import * as T from './tree'
 
 function get(key) {
+  // todo - cache on an 'instance'
   return T.get(this.$$tree, key)
 }
 
-// too - .get when initialState is passed
 export default function localReducer(state = {
   $$tree: T.make(),
   $$fns: T.make(),
@@ -29,7 +29,9 @@ export default function localReducer(state = {
 
 function flush(state) {
   return {
-    ...state,
+    get: state.get,
+    $$tree: state.$$tree,
+    $$fns: state.$$fns,
     $$changed: T.make()
   }
 }
@@ -40,7 +42,8 @@ function setState(state, { payload }) {
   }
 
   return {
-    ...state,
+    get: state.get,
+    $$fns: state.$$fns,
     $$tree: T.set(state.$$tree, payload.ident, payload.state),
     $$changed: T.set(state.$$changed, payload.ident, payload.state)
   }
@@ -57,7 +60,7 @@ function register(state, action) {
   // also makes preloading data simple
   let prevState = T.get(state.$$tree, ident)
   return {
-    ...state,
+    get: state.get,
     $$tree: prevState !== undefined ? state.$$tree : T.set(state.$$tree, ident, initial),
     $$fns: fn === reducer ? state.$$fns : T.set(state.$$fns, ident, reducer),
     $$changed: T.set(state.$$changed, ident,  prevState !== undefined ? prevState : initial)
@@ -79,13 +82,16 @@ function unmount(state, action) {
   let { payload: { persist, ident } } = action
   if (persist) {
     return {
-      ...state,
+      get: state.get,
+      $$tree: state.$$tree,
+      $$changed: state.$$changed,
       $$fns: T.set(state.$$fns, ident, identity) // we use this as a signal that it's been unmounted
     }
   }
   else {
     return {
-      ...state,
+      get: state.get,
+      $$changed: state.$$changed,
       $$tree: T.del(state.$$tree, ident),
       $$fns: T.del(state.$$fns, ident)
     }
@@ -114,7 +120,7 @@ function reduceAll(state, action) {
     reducers = fnToOb($$fns)
 
   let t = state.$$tree, entries = T.entries(state.$$tree)
-  for(let i = 0; i< entries.length; i++) {
+  for(let i = 0; i < entries.length; i++) {
     let [ key, value ] = entries[i]
     let $action = action
     // if this originated from the same key, then add me: true
@@ -135,9 +141,9 @@ function reduceAll(state, action) {
     }
   }
 
-
   return changed.length > 0 ? {
-    ...state,
+    get: state.get,
+    $$fns: state.$$fns,
     $$tree: t,
     $$changed: changed.reduce((c, [ key, value ]) => T.set(c, key, value), state.$$changed)
   } : state

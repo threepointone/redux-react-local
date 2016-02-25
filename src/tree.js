@@ -2,21 +2,14 @@ function log() {
   console.dir(this)
   return this
 }
+const forEach = [].forEach
 const hasProp = {}.hasOwnProperty
 
-function omit(obj, key) {
-  if (!obj::hasProp(key)) {
-    return obj
-  }
-  return Object.keys(obj).reduce((o, k) =>
-    k === key ?
-      o :
-      (o[k] = obj[k], o),
-    {})
-}
-
-
 import doHash from './hash'
+
+function replaceInArray(arr, pos, val) {
+  return [ ...arr.slice(0, pos),  val, ...arr.slice(pos+1) ]
+}
 
 function memoizeHasher(fn) {
   let cache = new Map()
@@ -32,18 +25,18 @@ function memoizeHasher(fn) {
 
 const getHash = memoizeHasher((level = 0, key) => {
   // generate a number between 0 - 31
-  return doHash(`${level}:${key}`, 5381)%32 + ''
+  return doHash(`${level}:${key}`, 5381)%32
 })
 
 const make0 = {
-  level: 0, hashes: {}
+  level: 0, hashes: new Array(32)
 }
 export function make(level = 0) {
   if(level === 0) {
     return make0
   }
   return {
-    level, hashes: {}
+    level, hashes: new Array(32)
   }
 }
 
@@ -57,11 +50,8 @@ export function set(tree, key, value) {
 
   if(!hasHash(tree, key)) {
     return {
-      ...tree,
-      hashes: {
-        ...hashes,
-        [hash]: { key, value }
-      }
+      level: tree.level,
+      hashes: replaceInArray(hashes, hash, { key, value })
     }
   }
   else if(isTree(hashes[hash])) {
@@ -70,11 +60,8 @@ export function set(tree, key, value) {
       return tree
     }
     return {
-      ...tree,
-      hashes: {
-        ...hashes,
-        [hash]: afterSet
-      }
+      level: tree.level,
+      hashes: replaceInArray(hashes, hash, afterSet)
     }
   }
   else {
@@ -83,25 +70,20 @@ export function set(tree, key, value) {
         return tree
       }
       return {
-        ...tree,
-        hashes: {
-          ...hashes,
-          [hash]: { key, value }
-        }
+        level: tree.level,
+        hashes: replaceInArray(hashes, hash, { key, value })
       }
     }
     return {
-      ...tree,
-      hashes: {
-        ...hashes,
-        [hash]: set(
+      level: tree.level,
+      hashes: replaceInArray(hashes, hash,
+        set(
           set(
             make(tree.level + 1),
             hashes[hash].key,
             hashes[hash].value),
           key,
-          value)
-      }
+          value))
     }
   }
 }
@@ -138,8 +120,8 @@ export function del(tree, key) {
   else {
     if(hashes[hash].key === key) {
       return {
-        ...tree,
-        hashes: omit(hashes, hash)
+        level: tree.level,
+        hashes: replaceInArray(hashes, hash, undefined)
       }
     }
     return tree
@@ -148,7 +130,7 @@ export function del(tree, key) {
 
 function memoizeEntries(fn) {
   let cache = new WeakMap()
-  return (o) => {
+  return o => {
 
     if(cache.has(o)) {
       return cache.get(o)
@@ -161,16 +143,48 @@ function memoizeEntries(fn) {
 export const entries = memoizeEntries((tree) => {
   let arr = []
   let hashes = tree.hashes
-  Object.keys(hashes).forEach(key => {
-    if(!isTree(hashes[key])) {
-      arr.push([ hashes[key].key, hashes[key].value ])
+
+
+  hashes::forEach(val => {
+    if(!val) {
+      return
+    }
+    if(!isTree(val)) {
+      arr.push([ val.key, val.value ])
+      return
     }
     else {
-      arr = arr.concat(entries(hashes[key]))
+      arr = arr.concat(entries(val))
     }
   })
   return arr
 })
+
+export function hasHash(tree, key) {
+  return !!tree.hashes[getHash(tree.level, key)]
+}
+
+export function toObject(tree) {
+  return entries(tree).reduce((o, [ key, value ]) => (o[key] = value, o), {})
+}
+
+export function compressedTree(t) {
+  if(!isTree(t)) {
+    return t
+  }
+  let len =0 , hashes = t.hashes.reduce((o, val, i) => {
+      if(val) {
+        len++
+        o[i] = compressedTree(val)
+      }
+      return o
+    } , {})
+  hashes.length = len
+  return {
+    level: t.level,
+    hashes
+  }
+}
 
 // todo - more performant
 // export function map(tree, fn) {
@@ -184,10 +198,3 @@ export const entries = memoizeEntries((tree) => {
 //   return mapped
 // }
 
-export function hasHash(tree, key) {
-  return tree.hashes::hasProp(getHash(tree.level, key))
-}
-
-export function toObject(tree) {
-  return entries(tree).reduce((o, [ key, value ]) => (o[key] = value, o), {})
-}
