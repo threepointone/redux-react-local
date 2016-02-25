@@ -40,8 +40,8 @@ export function make(level = 0) {
   }
 }
 
-export function isTree(tree) {
-  return tree && tree::hasProp('hashes') && tree::hasProp('level')
+export function isTree(tree, level = 0) {
+  return tree && tree::hasProp('hashes') && tree::hasProp('level') && tree.level === level
 }
 
 export function set(tree, key, value) {
@@ -54,7 +54,7 @@ export function set(tree, key, value) {
       hashes: replaceInArray(hashes, hash, { key, value })
     }
   }
-  else if(isTree(hashes[hash])) {
+  else if(isTree(hashes[hash], tree.level + 1)) {
     let afterSet = set(hashes[hash], key, value)
     if(afterSet === hashes[hash]) {
       return tree
@@ -96,7 +96,7 @@ export function get(tree, key) {
   if(!hasHash(tree, key)) {
     return
   }
-  else if(isTree(hashes[hash])) {
+  else if(isTree(hashes[hash], tree.level + 1)) {
     return get(hashes[hash], key)
   }
   else {
@@ -114,7 +114,7 @@ export function del(tree, key) {
     return tree
   }
 
-  else if(isTree(hashes[hash])) {
+  else if(isTree(hashes[hash], tree.level + 1)) {
     return del(hashes[hash], key)
   }
   else {
@@ -149,7 +149,7 @@ export const entries = memoizeEntries((tree) => {
     if(!val) {
       return
     }
-    if(!isTree(val)) {
+    if(!isTree(val, tree.level + 1)) {
       arr.push([ val.key, val.value ])
       return
     }
@@ -168,14 +168,15 @@ export function toObject(tree) {
   return entries(tree).reduce((o, [ key, value ]) => (o[key] = value, o), {})
 }
 
-export function compressedTree(t) {
-  if(!isTree(t)) {
+export function compressedTree(t, level = 0) {
+  if(!isTree(t, level)) {
     return t
   }
-  let len =0 , hashes = t.hashes.reduce((o, val, i) => {
+  let len = 0,
+    hashes = t.hashes.reduce((o, val, i) => {
       if(val) {
         len++
-        o[i] = compressedTree(val)
+        o[i] = compressedTree(val, level + 1)
       }
       return o
     } , {})
