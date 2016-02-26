@@ -1,5 +1,5 @@
-function log() {
-  console.dir(this)
+function log() {  //eslint-disable-line no-unused-vars
+  console.dir(this) // eslint-disable-line no-console
   return this
 }
 const forEach = [].forEach
@@ -11,22 +11,21 @@ function replaceInArray(arr, pos, val) {
   return [ ...arr.slice(0, pos),  val, ...arr.slice(pos+1) ]
 }
 
-function memoizeHasher(fn) {
-  let cache = new Map()
-  return (level, key) => {
-    let lk = `${level}${key}`
-    if(cache.has(lk)) {
-      return cache.get(lk)
+function memoize(fn, c = new WeakMap(), hasher = i => i) {
+  return (...args) => {
+    let hash = hasher(...args)
+    if(c.has(hash)) {
+      return c.get(hash)
     }
-    cache.set(lk, fn(level, key))
-    return cache.get(lk)
+    c.set(hash, fn(...args))
+    return c.get(hash)
   }
 }
 
-const getHash = memoizeHasher((level = 0, key) => {
-  // generate a number between 0 - 31
+const getHash = memoize((level = 0, key) => {
+  // generate a bucket between 0 - 31
   return doHash(`${level}:${key}`, 5381)%32
-})
+}, new Map(), (level, key) => `${level}${key}`)
 
 const make0 = {
   level: 0, hashes: new Array(32)
@@ -128,19 +127,7 @@ export function del(tree, key) {
   }
 }
 
-function memoizeEntries(fn) {
-  let cache = new WeakMap()
-  return o => {
-
-    if(cache.has(o)) {
-      return cache.get(o)
-    }
-    cache.set(o, fn(o))
-    return cache.get(o)
-  }
-}
-
-export const entries = memoizeEntries((tree) => {
+export const entries = memoize(tree => {
   let arr = []
   let hashes = tree.hashes
 
@@ -164,9 +151,9 @@ export function hasHash(tree, key) {
   return !!tree.hashes[getHash(tree.level, key)]
 }
 
-export function toObject(tree) {
+export const toObject = memoize(tree => {
   return entries(tree).reduce((o, [ key, value ]) => (o[key] = value, o), {})
-}
+})
 
 export function compressedTree(t, level = 0) {
   if(!isTree(t, level)) {
@@ -187,15 +174,14 @@ export function compressedTree(t, level = 0) {
   }
 }
 
-// todo - more performant
-// export function map(tree, fn) {
-//   let mapped = tree
-//   entries(tree).forEach(([ key, value ]) => {
-//     let computed = fn(value, key)
-//     if(computed !== value) {
-//       mapped = set(mapped, key, computed)
-//     }
-//   })
-//   return mapped
-// }
+export function map(tree, fn) {
+  let mapped = tree
+  entries(tree).forEach(([ key, value ]) => {
+    let computed = fn(value, key)
+    if(computed !== value) {
+      mapped = set(mapped, key, computed)
+    }
+  })
+  return mapped
+}
 

@@ -63,7 +63,7 @@ function register(state, action) {
     get: state.get,
     $$tree: prevState !== undefined ? state.$$tree : T.set(state.$$tree, ident, initial),
     $$fns: fn === reducer ? state.$$fns : T.set(state.$$fns, ident, reducer),
-    $$changed: T.set(state.$$changed, ident,  prevState !== undefined ? prevState : initial)
+    $$changed:  !prevState ? state.$$changed : T.set(state.$$changed, ident,  prevState !== undefined ? prevState : initial)
   }
 }
 
@@ -98,28 +98,17 @@ function unmount(state, action) {
   }
 }
 
-function memoizeRsToOb(fn) {
-  let cache = new WeakMap()
-  return (o) => {
-
-    if(cache.has(o)) {
-      return cache.get(o)
-    }
-    cache.set(o, fn(o))
-    return cache.get(o)
-  }
-}
-
-const fnToOb = memoizeRsToOb(T.toObject)
-
-
 function reduceAll(state, action) {
   // update all local keys
   let { meta: { ident, local } = {} } = action,
     { $$fns } = state, changed = [],
-    reducers = fnToOb($$fns)
+    reducers = T.toObject($$fns),
+    t = state.$$tree,
+    entries = local ?
+      [ [ ident, T.get(t, ident) ] ] :
+      T.entries(state.$$tree)
 
-  let t = state.$$tree, entries = T.entries(state.$$tree)
+
   for(let i = 0; i < entries.length; i++) {
     let [ key, value ] = entries[i]
     let $action = action
