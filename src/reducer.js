@@ -105,7 +105,7 @@ function reduceAll(state, action) {
     reducers = T.toObject($$fns),
     t = state.$$tree,
     entries = local ?
-      [ [ ident, T.get(t, ident) ] ] :
+      [ [ ident, T.get(t, ident) ] ] : // localized actions trigger only the relevant reducer
       T.entries(state.$$tree)
 
 

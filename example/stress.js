@@ -21,11 +21,11 @@ class Cell extends Component {
     period: PropTypes.number.isRequired
   }
   state = {
-    value: 0
+    value: Math.random()
   }
   componentDidMount() {
-    // setInterval(() => this.props.dispatch(this.props.$({ type: 'tick' })), this.props.period)
-    setInterval(() => this.props.setState(Math.random()), this.props.period)
+    setInterval(() => this.props.dispatch(this.props.$({ type: 'tick' })), this.props.period)
+    // setInterval(() => this.props.setState(Math.random()), this.props.period)
     // setInterval(() => this.setState({ value: Math.random() }), this.props.period)
   }
   render() {
@@ -52,5 +52,6 @@ class App extends Component {
   }
 }
 
-
+// console.profile()
 render(<Root><App /></Root>, document.getElementById('app'))
+// console.profileEnd()

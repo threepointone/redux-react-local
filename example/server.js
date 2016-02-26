@@ -41,7 +41,6 @@ store.dispatch({ type: 'increment' })
 store.dispatch({ type: 'increment' })
 store.dispatch({ type: 'increment' })
 
-
 console.log(  // eslint-disable-line no-console
   'state', T.toObject(store.getState().local.$$tree))
 
@@ -53,9 +52,11 @@ console.log(  // eslint-disable-line no-console
   </Provider>))
 // <div>3</div>
 
+console.log(  // eslint-disable-line no-console
+  JSON.stringify(store.getState().local.$$tree))
+
 // prep state for serialization
 const serialized = stringifySafe(store.getState())
-
 console.log(  // eslint-disable-line no-console
   JSON.stringify(serialized))
 

@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 
+
+
 // redux
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
@@ -61,7 +63,12 @@ export function makeStore(reducers = {}, initial = {}, middleware = []) {
           yield ensureFSA
         }
       }())),
-      batchedSubscribe(rafUpdateBatcher))
+      typeof window === 'object' &&
+      typeof window.devToolsExtension !== 'undefined' &&
+      process.env.NODE_ENV === 'development'
+        ? window.devToolsExtension() : f => f,
+      batchedSubscribe(process.env.RAF === true ?
+        rafUpdateBatcher : unstable_batchedUpdates))
   )
 
   store.sagas = sagaMiddleware
