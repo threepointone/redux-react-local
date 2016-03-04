@@ -52,13 +52,13 @@ const getHash = memoize((level = 0, key) => {
 
 export const make = (level = 0) => {
   return {
-    level, hashes: new Array(32)
+    level, slots: new Array(32)
   }
 }
 
 // helper on checking whether something is 'tree' like
 export function isTree(tree, level = 0) {
-  return tree && tree::hasProp('hashes') && tree::hasProp('level') && tree.level === level
+  return tree && tree::hasProp('slots') && tree::hasProp('level') && tree.level === level
 }
 
 
@@ -74,19 +74,19 @@ export function isTree(tree, level = 0) {
 // until we get a key/value pair
 export function get(tree, key) {
   let hash = getHash(tree.level, key),
-    { hashes } = tree
+    { slots } = tree
 
   if(!hasHash(tree, key)) {
     return
   }
-  else if(isTree(hashes[hash], tree.level + 1)) {
+  else if(isTree(slots[hash], tree.level + 1)) {
     // recurse
-    return get(hashes[hash], key)
+    return get(slots[hash], key)
   }
   else {
     // return value
-    if(hashes[hash].key === key) {
-      return hashes[hash].value
+    if(slots[hash].key === key) {
+      return slots[hash].value
     }
   }
 }
@@ -97,47 +97,47 @@ export function get(tree, key) {
 
 export function set(tree, key, value) {
   let hash = getHash(tree.level, key),
-    hashes = tree.hashes
+    slots = tree.slots
 
     // simple set
   if(!hasHash(tree, key)) {
     return {
       level: tree.level,
-      hashes: replaceInArray(hashes, hash, { key, value })
+      slots: replaceInArray(slots, hash, { key, value })
     }
   }
-  else if(isTree(hashes[hash], tree.level + 1)) {
+  else if(isTree(slots[hash], tree.level + 1)) {
     // recurse down
-    let afterSet = set(hashes[hash], key, value)
-    if(afterSet === hashes[hash]) {
+    let afterSet = set(slots[hash], key, value)
+    if(afterSet === slots[hash]) {
       // prevents a new object if nothing's changed
       return tree
     }
     return {
       level: tree.level,
-      hashes: replaceInArray(hashes, hash, afterSet)
+      slots: replaceInArray(slots, hash, afterSet)
     }
   }
   else {
     // update in place
-    if(hashes[hash].key === key) {
-      if(hashes[hash].value === value) {
+    if(slots[hash].key === key) {
+      if(slots[hash].value === value) {
         return tree
       }
       return {
         level: tree.level,
-        hashes: replaceInArray(hashes, hash, { key, value })
+        slots: replaceInArray(slots, hash, { key, value })
       }
     }
     // replace key value pair with a nested tree
     return {
       level: tree.level,
-      hashes: replaceInArray(hashes, hash,
+      slots: replaceInArray(slots, hash,
         set(
           set(
             make(tree.level + 1),
-            hashes[hash].key,
-            hashes[hash].value),
+            slots[hash].key,
+            slots[hash].value),
           key,
           value))
     }
@@ -149,25 +149,25 @@ export function set(tree, key, value) {
 // and return recursive copies of the array without it
 export function del(tree, key) {
   let hash = getHash(tree.level, key),
-    { hashes } = tree
+    { slots } = tree
 
   if(!hasHash(tree, key)) {
     return tree
   }
 
-  else if(isTree(hashes[hash], tree.level + 1)) {
-    let sub = del(hashes[hash], key)
-    if(hashes[hash] !== sub) {
-      return replaceInArray(hashes, hash, sub)
+  else if(isTree(slots[hash], tree.level + 1)) {
+    let sub = del(slots[hash], key)
+    if(slots[hash] !== sub) {
+      return replaceInArray(slots, hash, sub)
     }
     return tree
 
   }
   else {
-    if(hashes[hash].key === key && hashes[hash].value !== undefined) {
+    if(slots[hash].key === key && slots[hash].value !== undefined) {
       return {
         level: tree.level,
-        hashes: replaceInArray(hashes, hash, undefined)
+        slots: replaceInArray(slots, hash, undefined)
       }
     }
     return tree
@@ -177,9 +177,9 @@ export function del(tree, key) {
 // converts a tree to a [key, value] array
 export const entries = memoize(tree => {
   let arr = []
-  let hashes = tree.hashes
+  let slots = tree.slots
 
-  hashes::forEach(val => {
+  slots::forEach(val => {
     if(!val) {
       return
     }
@@ -195,7 +195,7 @@ export const entries = memoize(tree => {
 })
 
 export function hasHash(tree, key) {
-  return !!tree.hashes[getHash(tree.level, key)]
+  return !!tree.slots[getHash(tree.level, key)]
 }
 
 // converts a tree to an object
@@ -211,17 +211,17 @@ export function compressedTree(t, level = 0) {
     return t
   }
   let len = 0,
-    hashes = t.hashes.reduce((o, val, i) => {
+    slots = t.slots.reduce((o, val, i) => {
       if(val) {
         len++
         o[i] = compressedTree(val, level + 1)
       }
       return o
     } , {})
-  hashes.length = len
+  slots.length = len
   return {
     level: t.level,
-    hashes
+    slots
   }
 }
 
