@@ -147,6 +147,7 @@ export function set(tree, key, value) {
 // to delete a key from the tree
 // simply walk the tree till you find the slot
 // and return recursive copies of the array without it
+// todo - reclaim empty arrays
 export function del(tree, key) {
   let hash = getHash(tree.level, key),
     { slots } = tree
