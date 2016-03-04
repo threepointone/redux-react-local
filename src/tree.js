@@ -159,7 +159,9 @@ export function del(tree, key) {
   else if(isTree(slots[hash], tree.level + 1)) {
     let sub = del(slots[hash], key)
     if(slots[hash] !== sub) {
-      return replaceInArray(slots, hash, sub)
+      return {
+        level: tree.level,
+        slots: replaceInArray(slots, hash, sub)
     }
     return tree
 
