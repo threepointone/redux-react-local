@@ -22,7 +22,6 @@ function log() {  //eslint-disable-line no-unused-vars
 const forEach = [].forEach
 const hasProp = {}.hasOwnProperty
 
- // a hashing function on strings. murmur3
 
 // helper to makes a copy of an array with a new value at given position
 function replaceInArray(arr, pos, val) {
@@ -157,10 +156,15 @@ export function del(tree, key) {
   }
 
   else if(isTree(hashes[hash], tree.level + 1)) {
-    return del(hashes[hash], key)
+    let sub = del(hashes[hash], key)
+    if(hashes[hash] !== sub) {
+      return replaceInArray(hashes, hash, del(hashes[hash], key))
+    }
+    return tree
+
   }
   else {
-    if(hashes[hash].key === key) {
+    if(hashes[hash].key === key && hashes[hash].value !== undefined) {
       return {
         level: tree.level,
         hashes: replaceInArray(hashes, hash, undefined)
