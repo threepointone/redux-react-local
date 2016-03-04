@@ -31,14 +31,14 @@ function replaceInArray(arr, pos, val) {
 // generic memoizer on functions. because we use WeakMap,
 // we don't really worry about garbage collection
 // when the keys are no longer referenced
-function memoize(fn, c = new WeakMap(), hasher = i => i) {
+function memoize(fn, c = new WeakMap(), keyFn = i => i) {
   return (...args) => {
-    let hash = hasher(...args)
-    if(c.has(hash)) {
-      return c.get(hash)
+    let key = keyFn(...args)
+    if(c.has(key)) {
+      return c.get(key)
     }
-    c.set(hash, fn(...args))
-    return c.get(hash)
+    c.set(key, fn(...args))
+    return c.get(key)
   }
 }
 
