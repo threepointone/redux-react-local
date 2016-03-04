@@ -162,6 +162,7 @@ export function del(tree, key) {
       return {
         level: tree.level,
         slots: replaceInArray(slots, hash, sub)
+      }
     }
     return tree
 
