@@ -28,9 +28,9 @@ function replaceInArray(arr, pos, val) {
   return [ ...arr.slice(0, pos),  val, ...arr.slice(pos+1) ]
 }
 
-// generic memoizer on functions. because we use the weak map,
+// generic memoizer on functions. because we use WeakMap,
 // we don't really worry about garbage collection
-// when the keys are no longer reference.
+// when the keys are no longer referenced
 function memoize(fn, c = new WeakMap(), hasher = i => i) {
   return (...args) => {
     let hash = hasher(...args)
@@ -174,7 +174,7 @@ export function del(tree, key) {
   }
 }
 
-// converts a tree to an [key, value] array
+// converts a tree to a [key, value] array
 export const entries = memoize(tree => {
   let arr = []
   let hashes = tree.hashes
