@@ -22,6 +22,25 @@ function log() {  //eslint-disable-line no-unused-vars
 const forEach = [].forEach
 const hasProp = {}.hasOwnProperty
 
+// Add iterator to each tree and mimic Map behaviour in order to achieve better look in the Redux Dev Tools
+function wrapTree(t) {
+  function createTreeIterator(t) {
+    let treeEntries = entries(t);
+    let cur = 0;
+
+    return {
+      next() {
+        return cur < treeEntries.length ? {done: false, value: treeEntries[cur++]} : {done: true}
+      }
+    }
+  }
+
+  t[Symbol.iterator] = () => createTreeIterator(t)
+  // We need to define dummy 'set' method in order to mimic Map behaviour in the eyes of Redux Dev Tools
+  t.set = () => {}
+
+  return t
+}
 
 // helper to makes a copy of an array with a new value at given position
 function replaceInArray(arr, pos, val) {
@@ -51,9 +70,9 @@ const getHash = memoize((level = 0, key) => {
 // but we can just flush this periodically if needed
 
 export const make = (level = 0) => {
-  return {
+  return wrapTree({
     level, slots: new Array(32)
-  }
+  })
 }
 
 // helper on checking whether something is 'tree' like
@@ -101,10 +120,10 @@ export function set(tree, key, value) {
 
     // simple set
   if(!hasHash(tree, key)) {
-    return {
+    return wrapTree({
       level: tree.level,
       slots: replaceInArray(slots, hash, { key, value })
-    }
+    })
   }
   else if(isTree(slots[hash], tree.level + 1)) {
     // recurse down
@@ -113,10 +132,10 @@ export function set(tree, key, value) {
       // prevents a new object if nothing's changed
       return tree
     }
-    return {
+    return wrapTree({
       level: tree.level,
       slots: replaceInArray(slots, hash, afterSet)
-    }
+    })
   }
   else {
     // update in place
@@ -124,13 +143,13 @@ export function set(tree, key, value) {
       if(slots[hash].value === value) {
         return tree
       }
-      return {
+      return wrapTree({
         level: tree.level,
         slots: replaceInArray(slots, hash, { key, value })
-      }
+      })
     }
     // replace key value pair with a nested tree
-    return {
+    return wrapTree({
       level: tree.level,
       slots: replaceInArray(slots, hash,
         set(
@@ -140,7 +159,7 @@ export function set(tree, key, value) {
             slots[hash].value),
           key,
           value))
-    }
+    })
   }
 }
 
@@ -159,20 +178,20 @@ export function del(tree, key) {
   else if(isTree(slots[hash], tree.level + 1)) {
     let sub = del(slots[hash], key)
     if(slots[hash] !== sub) {
-      return {
+      return wrapTree({
         level: tree.level,
         slots: replaceInArray(slots, hash, sub)
-      }
+      })
     }
     return tree
 
   }
   else {
     if(slots[hash].key === key && slots[hash].value !== undefined) {
-      return {
+      return wrapTree({
         level: tree.level,
         slots: replaceInArray(slots, hash, undefined)
-      }
+      })
     }
     return tree
   }
