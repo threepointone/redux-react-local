@@ -1,6 +1,11 @@
 {
   "presets": ["es2015", "stage-0", "react"],
-  "plugins": ["transform-decorators-legacy", "transform-proto-to-assign"],
+  "plugins": [
+    "transform-decorators-legacy",
+    "transform-proto-to-assign",
+    "transform-class-properties",
+    ["transform-es2015-classes", {loose: true}],
+  ],
   "env": {
     "development": {
       "presets": ["react-hmre"]
