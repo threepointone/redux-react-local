@@ -87,7 +87,7 @@ export default function local({
         }
       })()
 
-      $ = action => {
+      $ = (action, useLocal = true) => {
         // 'localize' an event. super convenient for making actions 'local' to this component
         return  {
           ...action,
@@ -96,7 +96,7 @@ export default function local({
             ...action.meta || {},
             ident: this.state.id,
             type: action.type,
-            local: true
+            local: useLocal
           }
         }
       }
