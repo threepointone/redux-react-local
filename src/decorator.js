@@ -1,5 +1,7 @@
 import React, { PropTypes, Component } from 'react'
 
+import { getLocalState } from './utils';
+
 const isBrowserLike = typeof navigator !== 'undefined'
 
 function whenUndefined(o, orElse) {
@@ -77,13 +79,13 @@ export default function local({
       state = (() => {
         let id = getId(this.props),
           storeState = this.store.getState()
-
-        if(!storeState.local) {
+  
+		if(!getLocalState( storeState )) {
           throw new Error('did you forget to include the `local` reducer?')
         }
         return {
           id,
-          value: whenUndefined(storeState.local.get(id), getInitial(this.props))
+		  value: whenUndefined( getLocalState( storeState ).get( id ), getInitial( this.props ) )
         }
       })()
 
@@ -145,7 +147,7 @@ export default function local({
 
           this.setState({
             id,
-            value: whenUndefined(this.store.getState().local.get(id), init)
+			value: whenUndefined( getLocalState( this.store.getState() ).get( id ), init )
           })
         }
       }
