@@ -1,6 +1,7 @@
 /* global describe, it, beforeEach, afterEach */
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { render, unmountComponentAtNode } from 'react-dom'
 
 import * as T from '../src/tree'
