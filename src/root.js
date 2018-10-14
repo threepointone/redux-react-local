@@ -1,4 +1,5 @@
-import { Component, PropTypes } from 'react'
+import PropTypes from 'prop-types';
+import { Component } from 'react';
 
 import * as T from './tree'
 
@@ -19,7 +20,7 @@ export default class Root extends Component {
 
   fns = {}
   _local = (ident, fn) => {
-    this.fns[ident] = [ ...this.fns[ident] || [], fn ]
+    this.fns[ident] = [ ...(this.fns[ident] || []), fn ]
     return () => this.fns[ident] = this.fns[ident].filter(x => x!== fn)
   }
   componentWillMount() {

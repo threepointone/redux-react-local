@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react'
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 const isBrowserLike = typeof navigator !== 'undefined'
 
@@ -89,16 +90,16 @@ export default function local({
 
       $ = action => {
         // 'localize' an event. super convenient for making actions 'local' to this component
-        return  {
+        return {
           ...action,
           type: `${this.state.id}:${action.type}`,
           meta: {
-            ...action.meta || {},
+            ...(action.meta || {}),
             ident: this.state.id,
             type: action.type,
             local: true
           }
-        }
+        };
       }
 
       _setState = state => {
@@ -174,7 +175,7 @@ export default function local({
             {this.props.children}
         </Target>
       }
-    }
-  }
+    };
+  };
 }
 
