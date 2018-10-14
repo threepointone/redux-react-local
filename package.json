@@ -1,12 +1,13 @@
 {
-  "name": "redux-react-local",
+  "name": "@wix/redux-react-local",
   "version": "1.4.1",
   "description": "recovering local component state for redux",
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && NODE_ENV=production babel src -d lib",
     "start": "./node_modules/.bin/webpack-dev-server --hot --inline --port 3000 --config webpack.config.js",
-    "test": "NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/.bin/karma start tests/karma.conf.js --single-run"
+    "test": "NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/.bin/karma start tests/karma.conf.js --single-run",
+    "release": "wnpm-release -- --no-shrinkwrap"
   },
   "keywords": [
     "react",
@@ -17,6 +18,7 @@
   "author": "Sunil Pai <threepointone@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@wix/wnpm-ci": "^6.1.0",
     "babel-cli": "^6.18.0",
     "babel-core": "^6.5.2",
     "babel-eslint": "^7.1.1",
