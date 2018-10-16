@@ -3,6 +3,7 @@
   "version": "1.4.1",
   "description": "recovering local component state for redux",
   "main": "lib/index.js",
+  "files": "lib",
   "scripts": {
     "build": "rm -rf lib && NODE_ENV=production babel src -d lib",
     "start": "./node_modules/.bin/webpack-dev-server --hot --inline --port 3000 --config webpack.config.js",
