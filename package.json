@@ -1,12 +1,14 @@
 {
-  "name": "redux-react-local",
+  "name": "@wix/redux-react-local",
   "version": "1.4.1",
   "description": "recovering local component state for redux",
   "main": "lib/index.js",
+  "files": ["lib"],
   "scripts": {
     "build": "rm -rf lib && NODE_ENV=production babel src -d lib",
     "start": "./node_modules/.bin/webpack-dev-server --hot --inline --port 3000 --config webpack.config.js",
-    "test": "NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/.bin/karma start tests/karma.conf.js --single-run"
+    "test": "NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/.bin/karma start tests/karma.conf.js --single-run",
+    "release": "wnpm-release -- --no-shrinkwrap"
   },
   "keywords": [
     "react",
@@ -17,6 +19,7 @@
   "author": "Sunil Pai <threepointone@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@wix/wnpm-ci": "^6.1.0",
     "babel-cli": "^6.18.0",
     "babel-core": "^6.5.2",
     "babel-eslint": "^7.1.1",
@@ -30,8 +33,8 @@
     "eslint": "^3.11.1",
     "eslint-config-rackt": "^1.1.1",
     "eslint-plugin-react": "^6.7.1",
-    "expect": "^1.14.0",
-    "expect-jsx": "^2.3.0",
+    "expect": "^23.6.0",
+    "expect-jsx": "^5.0.0",
     "isparta-loader": "^2.0.0",
     "karma": "^1.3.0",
     "karma-chrome-launcher": "^2.0.0",
@@ -44,8 +47,8 @@
     "lodash.isplainobject": "^4.0.2",
     "mocha": "^3.2.0",
     "raf": "^3.2.0",
-    "react": "^15.4.1",
-    "react-dom": "^15.4.1",
+    "react": "^16.5.0",
+    "react-dom": "^16.5.2",
     "react-motion": "^0.4.2",
     "react-redux": "^4.4.0",
     "react-redux-optimist": "^1.0.3",
@@ -60,5 +63,8 @@
   },
   "peerDependencies": {
     "react": "*"
+  },
+  "publishConfig": {
+    "registry": "http://repo.dev.wix/artifactory/api/npm/npm-repos"
   }
 }

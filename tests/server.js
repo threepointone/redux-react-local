@@ -1,6 +1,8 @@
 /* global describe, it, beforeEach, afterEach */
 
-import React, { Component, PropTypes } from 'react'
+import PropTypes from 'prop-types';
+
+import React, { Component } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom'
 
 import { createStore, combineReducers } from 'redux'
